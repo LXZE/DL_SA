@@ -4,6 +4,8 @@ import re
 import pandas as pd
 
 def cleanLine(line):
+	user_pattern = re.compile(r'@(\w){1,15}\s')
+	line = re.sub(user_pattern, ' ', line)
 	return line.replace('\n',' ')
 
 try:
