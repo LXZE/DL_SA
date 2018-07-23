@@ -8,6 +8,5 @@
 pyvenv.cfg
 .venv
 pip-selfcheck.json
-thai-word-segmentation/
 *.h5
 data/
