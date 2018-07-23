@@ -53,9 +53,14 @@ tmp = ''
 i=0
 for line in file.readlines():
 	if bool(pattern.search(line)):
+		result = stripping(tmp.replace('\ufeff',''))
+		if len(result) == 0:
+			tmp = ''
+			continue
+
 		tableData = tableData.append({
-			'time':line[1:-3],
-			'text':stripping(tmp.replace('\ufeff',''))
+			'time': line[1:-3],
+			'text': result
 		}, ignore_index=True)
 		tmp = ''
 		# if '"' in tmp:
