@@ -4,3 +4,6 @@
 [submodule "thai-word-segmentation"]
 	path = thai-word-segmentation
 	url = https://github.com/sertiscorp/thai-word-segmentation
+[submodule "lexicon-thai"]
+	path = lexicon-thai
+	url = https://github.com/PyThaiNLP/lexicon-thai

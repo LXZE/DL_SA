@@ -44,7 +44,8 @@ def filtering(line):
 	return [re.sub(non_thai_eng_pattern, '', line), tmp]
 
 def stripping(line):
-	return line.lstrip(' ').rstrip(' ')
+	tmp = line.lstrip(' ')
+	return tmp.rstrip(' ')
 
 try:
 	file = open(sys.argv[1],'r')
