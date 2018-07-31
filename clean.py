@@ -49,7 +49,7 @@ def stripping(line):
 
 try:
 	file = open(sys.argv[1],'r')
-	fileName = sys.argv[1].split('.')[0]
+	fileName = sys.argv[1].split('/')[-1].split('.')[0]
 except IndexError:
 	print('Please give the input file')
 	exit(0)
@@ -84,7 +84,7 @@ for line in file.readlines():
 	else:
 		tmp += cleanLine(line)
 
-tableData.to_csv(fileName+'_clean.csv', index=False,
+tableData.to_csv('data/clean/'+fileName+'_clean.csv', index=False,
 				quoting=csv.QUOTE_NONNUMERIC, doublequote=False, escapechar="\\")
 # TODO: print unwant char into some txt file, for further filtering
 pp.pprint(all_unwant)
