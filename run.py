@@ -1,16 +1,14 @@
 import sys
-sys.path.append('./thai-word-segmentation')
 from thainlplib import ThaiWordSegmentLabeller
 import tensorflow as tf
 import pandas as pd
 
-saved_model_path='./thai-word-segmentation/saved_model'
-
+saved_model_path='saved_model'
 def nonzero(a):
-    return [i for i, e in enumerate(a) if e != 0]
+	return [i for i, e in enumerate(a) if e != 0]
 
 def split(s, indices):
-    return [s[i:j] for i,j in zip(indices, indices[1:]+[None])]	
+	return [s[i:j] for i,j in zip(indices, indices[1:]+[None])]	
 
 try:
 	dataset = pd.read_csv(sys.argv[1], escapechar="\\")
@@ -26,10 +24,17 @@ with tf.Session() as session:
 	signature = model.signature_def[tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY]
 	graph = tf.get_default_graph()
 
-	g_inputs = graph.get_tensor_by_name(signature.inputs['inputs'].name)
-	g_lengths = graph.get_tensor_by_name(signature.inputs['lengths'].name)
-	g_training = graph.get_tensor_by_name(signature.inputs['training'].name)
-	g_outputs = graph.get_tensor_by_name(signature.outputs['outputs'].name)
+	print(signature)
+
+	# g_inputs = graph.get_tensor_by_name(signature.inputs['inputs'].name)
+	# g_lengths = graph.get_tensor_by_name(signature.inputs['lengths'].name)
+	# g_training = graph.get_tensor_by_name(signature.inputs['training'].name)
+	# g_outputs = graph.get_tensor_by_name(signature.outputs['outputs'].name)
+
+	g_inputs = graph.get_tensor_by_name('IteratorGetNext:1')
+	g_lengths = graph.get_tensor_by_name('IteratorGetNext:0')
+	g_training = graph.get_tensor_by_name('Placeholder_1:0')
+	g_outputs = graph.get_tensor_by_name('boolean_mask_1/Gather:0')
 
 	for idx,row in dataset.iterrows():
 		print(idx)
@@ -39,15 +44,5 @@ with tf.Session() as session:
 
 		y = session.run(g_outputs, feed_dict = {g_inputs: inputs, g_lengths: lengths, g_training: False})
 		for w in split(text, nonzero(y)): print(w, end='|')
-		# print()
-		print('-'*20)
-
-
-# for idx,row in dataset.iterrows():
-# 	# print(row)
-# 	inputs = [ThaiWordSegmentLabeller.get_input_labels(row['text'])]
-# 	lengths = [len(text)]
-	# print(row['text'], inputs)
-	# print('-'*20)
-	# if idx == 20:
-	# 	break
+		print()
+		print('-'*40)

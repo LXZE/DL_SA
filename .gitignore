@@ -10,3 +10,4 @@ pyvenv.cfg
 pip-selfcheck.json
 *.h5
 data/*
+saved_model/

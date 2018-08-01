@@ -18,7 +18,7 @@ def cleanLine(line):
 
 	duplicate_space = re.compile(r'(\s{2,})')
 
-	non_char = re.compile(r'"|\'|\\|/|!|_|-|—|=|\+|\.|\n|\(|\)|\*|•|@|\?|\^|~|“|”|\[|\]|{|}|:|\|')
+	non_char = re.compile(r'"|\'|\\|/|!|_|-|—|=|\+|\.|\n|\(|\)|\*|•|@|\?|\^|~|“|”|\[|\]|{|}|:|;|\|')
 	special_char = re.compile(r'&\S+;')
 
 	# pattern create and remove space
