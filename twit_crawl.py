@@ -17,6 +17,7 @@ from tweepy import Stream
 
 import signal
 import sys
+import pathlib
 
 import json
 import pprint
@@ -33,6 +34,7 @@ consumer_secret = config['twitter']['consumer_secret']
 
 ftime = lambda: t.strftime('%Y_%m_%d')
 now = lambda: t.strftime('%Y/%m/%d-%H:%M:%S')
+pathlib.Path('txt').mkdir(parents=True, exist_ok=True) 
 fileName = 'txt/twit_{}.txt'
 errorFileName = 'error.txt'
 file = codecs.open(fileName.format(ftime()), 'a', 'utf-8-sig')

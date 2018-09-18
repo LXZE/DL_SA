@@ -12,3 +12,6 @@ pip-selfcheck.json
 data/*
 saved_model/
 .DS_Store
+error.txt
+account.ini
+txt/
