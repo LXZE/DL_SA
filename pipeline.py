@@ -11,7 +11,8 @@ print(rawFileList)
 pathlib.Path('data/clean').mkdir(parents=True, exist_ok=True) 
 for file in rawFileList:
 	print('[{}] Cleaning {}'.format(getTime(), file))
-	code = call(['python', 'clean.py', file])
+	# code = call(['python', 'clean.py', file])
+	code = call(['python', 'clean_parallel.py', file])
 	print('[{}] Finish cleaning {} with code {}'.format(getTime(), file, code))
 	print('-'*20)
 
