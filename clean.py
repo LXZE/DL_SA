@@ -5,39 +5,42 @@ import pandas as pd
 from pprint import PrettyPrinter
 pp = PrettyPrinter(indent=4)
 
+# Pattern
+user_pattern = re.compile(r'@(\w){1,15}\s')
+emoji_pattern = re.compile("["
+	u"\U0001F600-\U0001F64F"  # emoticons
+	u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+	u"\U0001F680-\U0001F6FF"  # transport & map symbols
+	u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+						"]+", flags=re.UNICODE)
+multichar_emoji_pattern = re.compile(r'(<3)')
+url_pattern = re.compile(r'(https:\S+)')
+hashtag_pattern = re.compile(r'(\#\S+)')
+
+duplicate_space = re.compile(r'(\s{2,})')
+
+special_char = re.compile(r'&\S+;')
+non_char = re.compile(r'"|\'|\\|/|!|_|-|—|=|\+|\.|\n|\(|\)|\*|•|@|\?|\^|~|“|”|\[|\]|{|}|<|>|:|;|\|')
+
 def cleanLine(line):
-	user_pattern = re.compile(r'@(\w){1,15}\s')
-	emoji_pattern = re.compile("["
-		u"\U0001F600-\U0001F64F"  # emoticons
-		u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-		u"\U0001F680-\U0001F6FF"  # transport & map symbols
-		u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-						   "]+", flags=re.UNICODE)
-	url_pattern = re.compile(r'(https:\S+)')
-	hashtag_pattern = re.compile(r'(\#\S+)')
-
-	duplicate_space = re.compile(r'(\s{2,})')
-
-	non_char = re.compile(r'"|\'|\\|/|!|_|-|—|=|\+|\.|\n|\(|\)|\*|•|@|\?|\^|~|“|”|\[|\]|{|}|:|;|\|')
-	special_char = re.compile(r'&\S+;')
-
 	# pattern create and remove space
 	line = re.sub(user_pattern, ' ', line)
 
 	# clear all unneccessary text
 	line = re.sub(emoji_pattern, '', line)
+	line = re.sub(multichar_emoji_pattern, '', line)
 	line = re.sub(url_pattern, '', line)
 	line = re.sub(hashtag_pattern, '', line)
-	line = re.sub(non_char, '', line)
 	line = re.sub(special_char, '', line)
+	line = re.sub(non_char, '', line)
 
 	line = re.sub(duplicate_space, ' ', line)
 
 	return line.replace('\n',' ')
 
+non_thai_eng_pattern = re.compile(r'([^\u0E00-\u0E7Fa-zA-Z0-9฿%\s]+)')
 def filtering(line):
 	tmp = set()
-	non_thai_eng_pattern = re.compile(r'([^\u0E00-\u0E7Fa-zA-Z0-9฿%\s]+)')
 	non_char_set = set(re.findall(non_thai_eng_pattern, line))
 	for n in non_char_set:
 		tmp.update(n)
@@ -46,6 +49,13 @@ def filtering(line):
 def stripping(line):
 	tmp = line.lstrip(' ')
 	return tmp.rstrip(' ')
+
+lol_pattern = re.compile(r'(5{2,}\+?)')
+vowel_error = re.compile(r'เเ')
+def fixing(line):
+	line = re.sub(lol_pattern, '<lol>', line)
+	line = re.sub(vowel_error, 'แ', line)
+	return line
 
 try:
 	file = open(sys.argv[1],'r')
@@ -74,7 +84,7 @@ for line in file.readlines():
 
 		tableData = tableData.append({
 			'time': line[1:-3],
-			'text': result
+			'text': stripping(fixing(result))
 		}, ignore_index=True)
 		tmp = ''
 		# if '"' in tmp:
@@ -87,4 +97,4 @@ for line in file.readlines():
 tableData.to_csv('data/clean/'+fileName+'_clean.csv', index=False,
 				quoting=csv.QUOTE_NONNUMERIC, doublequote=False, escapechar="\\")
 # TODO: print unwant char into some txt file, for further filtering
-pp.pprint(all_unwant)
+# pp.pprint(all_unwant)

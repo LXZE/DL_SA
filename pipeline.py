@@ -3,13 +3,14 @@ from subprocess import call
 import pathlib
 
 # clean
-rawFileList = glob.glob('data/twit_*')
+rawFileList = sorted(glob.glob('data/twit_*'))
 print(rawFileList)
 pathlib.Path('data/clean').mkdir(parents=True, exist_ok=True) 
 for file in rawFileList:
 	code = call(['python', 'clean.py', file])
 	print(code)
 
+'''
 # filter
 cleanFileList = glob.glob('data/clean/*')
 print(cleanFileList)
@@ -19,3 +20,4 @@ for file in cleanFileList:
 
 # gather
 code = call(['python', 'gather_data.py', file])
+'''
