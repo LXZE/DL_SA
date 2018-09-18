@@ -41,9 +41,10 @@ def cleanLine(line):
 non_thai_eng_pattern = re.compile(r'([^\u0E00-\u0E7Fa-zA-Z0-9฿%\s]+)')
 def filtering(line):
 	tmp = set()
-	non_char_set = set(re.findall(non_thai_eng_pattern, line))
-	for n in non_char_set:
-		tmp.update(n)
+	non_thai_eng_pattern = re.compile(r'([^\u0E00-\u0E7Fa-zA-Z0-9#฿%\s]+)')
+	# non_char_set = set(re.findall(non_thai_eng_pattern, line))
+	# for n in non_char_set:
+	# 	tmp.update(n)
 	return [re.sub(non_thai_eng_pattern, '', line), tmp]
 
 def stripping(line):
@@ -70,14 +71,14 @@ except FileNotFoundError:
 pattern = re.compile('\[\d{4}/\d{2}/\d{2}-(?:\d{1,2}:){2}\d{1,2}\],\n')
 tableData = pd.DataFrame(columns=['time','text'])
 
-all_unwant = set()
+# all_unwant = set()
 tmp = ''
 i=0
 for line in file.readlines():
 	if bool(pattern.search(line)):
 		result = stripping(tmp.replace('\ufeff',''))
 		[result, unwant] = filtering(result)
-		all_unwant.update(unwant)
+		# all_unwant.update(unwant)
 		if len(result) == 0:
 			tmp = ''
 			continue
