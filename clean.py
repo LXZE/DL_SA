@@ -54,7 +54,7 @@ def stripping(line):
 lol_pattern = re.compile(r'(5{2,}\+?)')
 vowel_error = re.compile(r'เเ')
 def fixing(line):
-	line = re.sub(lol_pattern, '<lol>', line)
+	line = re.sub(lol_pattern, 'lol', line)
 	line = re.sub(vowel_error, 'แ', line)
 	return line
 
