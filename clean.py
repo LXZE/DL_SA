@@ -3,6 +3,7 @@ import csv
 import re
 import pandas as pd
 from pprint import PrettyPrinter
+import pythainlp as pyt
 pp = PrettyPrinter(indent=4)
 
 # Pattern
@@ -53,9 +54,14 @@ def stripping(line):
 
 lol_pattern = re.compile(r'(5{2,}\+?)')
 vowel_error = re.compile(r'เเ')
+repeat_pattern = re.compile(r'(\S+?)\1+')
+repeatable_char = ['อ', 'ร', 'ว', 'ย']
+line_sub = lambda line, match, count: re.sub('{}'.format(match.group(0)), match.group(1)*count, line, count=1)
 def fixing(line):
 	line = re.sub(lol_pattern, 'lol', line)
 	line = re.sub(vowel_error, 'แ', line)
+	line = re.sub(repeat_pattern, r'\1\1', line)
+	line = ''.join(list(filter(lambda word: len(word) > 1 or word == ' ', pyt.word_tokenize(line, engine='newmm'))))
 	return line
 
 try:
@@ -68,7 +74,7 @@ except FileNotFoundError:
 	print('File not found')
 	exit(0)
 
-pattern = re.compile('\[\d{4}/\d{2}/\d{2}-(?:\d{1,2}:){2}\d{1,2}\],\n')
+pattern = re.compile('\[\d{4}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}\],')
 tableData = pd.DataFrame(columns=['time','text'])
 
 # all_unwant = set()
@@ -82,19 +88,14 @@ for line in file.readlines():
 		if len(result) == 0:
 			tmp = ''
 			continue
-
 		tableData = tableData.append({
 			'time': line[1:-3],
 			'text': stripping(fixing(result))
 		}, ignore_index=True)
 		tmp = ''
-		# if '"' in tmp:
-		# 	print('found quote at ',i)
-		# print(i)
 		i+=1
 	else:
 		tmp += cleanLine(line)
-
 tableData.to_csv('data/clean/'+fileName+'_clean.csv', index=False,
 				quoting=csv.QUOTE_NONNUMERIC, doublequote=False, escapechar="\\")
 # TODO: print unwant char into some txt file, for further filtering
