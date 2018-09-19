@@ -55,11 +55,13 @@ def stripping(line):
 lol_pattern = re.compile(r'(5{2,}\+?)')
 vowel_error = re.compile(r'เเ')
 repeat_pattern = re.compile(r'(\S+?)\1+')
-repeatable_char = ['อ', 'ร', 'ว', 'ย']
-line_sub = lambda line, match, count: re.sub('{}'.format(match.group(0)), match.group(1)*count, line, count=1)
+# repeatable_char = ['อ', 'ร', 'ว', 'ย']
+# line_sub = lambda line, match, count: re.sub('{}'.format(match.group(0)), match.group(1)*count, line, count=1)
 def fixing(line):
 	line = re.sub(lol_pattern, 'lol', line)
 	line = re.sub(vowel_error, 'แ', line)
+	if bool(repeat_pattern.search(line)):
+		print(line)
 	line = re.sub(repeat_pattern, r'\1\1', line)
 	line = ''.join(list(filter(lambda word: len(word) > 1 or word == ' ', pyt.word_tokenize(line, engine='newmm'))))
 	return line

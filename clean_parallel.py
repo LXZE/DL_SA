@@ -51,34 +51,13 @@ def stripping(line):
 
 lol_pattern = re.compile(r'(5{2,}\+?)')
 vowel_error = re.compile(r'เเ')
-repeat_pattern = re.compile(r'(\S+?)\1+')
-repeatable_char = ['อ', 'ร', 'ว', 'ย']
+repeat_pattern = re.compile(r'([^\d\s]+?)\1+')
+# repeatable_char = ['อ', 'ร', 'ว', 'ย']
 # line_sub = lambda line, match, count: re.sub('{}'.format(match.group(0)), match.group(1)*count, line, count=1)
 def fixing(line):
 	line = re.sub(lol_pattern, 'lol', line)
 	line = re.sub(vowel_error, 'แ', line)
 	line = re.sub(repeat_pattern, r'\1\1', line)
-	'''
-	try:
-		if bool(repeat_pattern.search(line)):
-			for match in repeat_pattern.finditer(line):
-				# if match.group(1) in repeatable_char: # if match char set in repeatable list
-				# 	pos = re.search(match.group(0),line).start()
-				# 	if line[pos-1] in ['เ', 'แ'] or match.group(1) == 'ร': # if char before that repeat char is e|er-vowel or it's 'r' then twice
-				# 		line = line_sub(line, match, 2)
-				# 	else: # if char before not match condition then it should be once
-				# 		line = line_sub(line, match, 1)
-				# else: # if match char set not in repeatable char
-				# 	if len(match.group(1)) == 1: # if not repeat char but match len = 1 so repeat once
-				# 		line = line_sub(line, match, 1)
-				# 	else: # if repeat char is kind of pattern then twice
-				# 		line = line_sub(line, match, 2)
-				line = line_sub(line, match, 2)
-		else:
-			pass
-	except AttributeError:
-		pass
-	'''
 	line = ''.join(list(filter(lambda word: len(word) > 1 or word == ' ', pyt.word_tokenize(line, engine='newmm'))))
 	return line
 
@@ -144,3 +123,25 @@ if __name__ == '__main__':
 					quoting=csv.QUOTE_NONNUMERIC, doublequote=False, escapechar="\\")
 	# TODO: print unwant char into some txt file, for further filtering
 	# pp.pprint(all_unwant)
+
+'''
+try:
+	if bool(repeat_pattern.search(line)):
+		for match in repeat_pattern.finditer(line):
+			# if match.group(1) in repeatable_char: # if match char set in repeatable list
+			# 	pos = re.search(match.group(0),line).start()
+			# 	if line[pos-1] in ['เ', 'แ'] or match.group(1) == 'ร': # if char before that repeat char is e|er-vowel or it's 'r' then twice
+			# 		line = line_sub(line, match, 2)
+			# 	else: # if char before not match condition then it should be once
+			# 		line = line_sub(line, match, 1)
+			# else: # if match char set not in repeatable char
+			# 	if len(match.group(1)) == 1: # if not repeat char but match len = 1 so repeat once
+			# 		line = line_sub(line, match, 1)
+			# 	else: # if repeat char is kind of pattern then twice
+			# 		line = line_sub(line, match, 2)
+			line = line_sub(line, match, 2)
+	else:
+		pass
+except AttributeError:
+	pass
+'''
