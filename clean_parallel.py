@@ -61,16 +61,6 @@ def fixing(line):
 	line = ''.join(list(filter(lambda word: len(word) > 1 or word == ' ', pyt.word_tokenize(line, engine='newmm'))))
 	return line
 
-try:
-	file = open(sys.argv[1],'r')
-	fileName = sys.argv[1].split('/')[-1].split('.')[0]
-except IndexError:
-	print('Please give the input file')
-	exit(0)
-except FileNotFoundError:
-	print('File not found')
-	exit(0)
-
 pattern = re.compile('\[\d{4}/\d{2}/\d{2}-(?:\d{1,2}:){2}\d{1,2}\],\n')
 
 def process(lines, core, acc_result):
@@ -97,6 +87,17 @@ def process(lines, core, acc_result):
 	print('core {} finished'.format(core))
 
 if __name__ == '__main__':
+
+	try:
+		file = open(sys.argv[1],'r')
+		fileName = sys.argv[1].split('/')[-1].split('.')[0]
+	except IndexError:
+		print('Please give the input file')
+		exit(0)
+	except FileNotFoundError:
+		print('File not found')
+		exit(0)
+
 	print('start manipulate')
 	ncore = mp.cpu_count()
 	# output = mp.Queue()

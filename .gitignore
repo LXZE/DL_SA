@@ -16,3 +16,4 @@ error.txt
 account.ini
 txt/
 man/
+__pycache__/
