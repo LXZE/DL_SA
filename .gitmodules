@@ -7,6 +7,3 @@
 [submodule "lexicon-thai"]
 	path = lexicon-thai
 	url = https://github.com/PyThaiNLP/lexicon-thai
-[submodule "ThaiTextUtility"]
-	path = ThaiTextUtility
-	url = https://github.com/LXZE/ThaiTextUtility
