@@ -9,4 +9,4 @@
 	url = https://github.com/PyThaiNLP/lexicon-thai
 [submodule "ThaiTextUtility"]
 	path = ThaiTextUtility
-	url = https://github.com/pitiphol/ThaiTextUtility
+	url = https://github.com/LXZE/ThaiTextUtility
