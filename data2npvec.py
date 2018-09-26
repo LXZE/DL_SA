@@ -44,57 +44,55 @@ g_training = graph.get_tensor_by_name('Placeholder_1:0')
 g_outputs = graph.get_tensor_by_name('boolean_mask_1/Gather:0')
 
 def nonzero(a):
-    return [i for i,e in enumerate(a) if e != 0]
+	return [i for i,e in enumerate(a) if e != 0]
 def split(s, indices):
-    return [s[i:j] for i,j in zip(indices, indices[1:]+[None])]
+	return [s[i:j] for i,j in zip(indices, indices[1:]+[None])]
 repeat_pattern = re.compile(r'([^\d\s]+?)\1+')
 repeatable_char = ['อ', 'ร', 'ว', 'ย']
 line_sub = lambda line, match, count: re.sub('{}'.format(match.group(0)), match.group(1)*count, line, count=1)
 def clean_word(word):
-    line = word
-    try:
-	    if bool(repeat_pattern.search(line)):
-		    for match in repeat_pattern.finditer(line):
-			    if match.group(1) in repeatable_char: # if match char set in repeatable list
-				    pos = re.search(match.group(0),line).start()
-				    if line[pos-1] in ['เ', 'แ'] or match.group(1) == 'ร': # if char before that repeat char is e|er-vowel or it's 'r' then twice
-					    line = line_sub(line, match, 2)
-				    else: # if char before not match condition then it should be once
-					    line = line_sub(line, match, 1)
-			    else: # if match char set not in repeatable char
-				    if len(match.group(1)) == 1: # if not repeat char but match len = 1 so repeat once
-					    line = line_sub(line, match, 1)
-				    else: # if repeat char is kind of pattern then twice
-					    line = line_sub(line, match, 2)
-			    line = line_sub(line, match, 2)
-	    else:
-		    pass
-    except AttributeError:
-	    pass
-    return line
+	line = word
+	try:
+		if bool(repeat_pattern.search(line)):
+			for match in repeat_pattern.finditer(line):
+				if match.group(1) in repeatable_char: # if match char set in repeatable list
+					pos = re.search(match.group(0),line).start()
+					if line[pos-1] in ['เ', 'แ'] or match.group(1) == 'ร': # if char before that repeat char is e|er-vowel or it's 'r' then twice
+						line = line_sub(line, match, 2)
+					else: # if char before not match condition then it should be once
+						line = line_sub(line, match, 1)
+				else: # if match char set not in repeatable char
+					if len(match.group(1)) == 1: # if not repeat char but match len = 1 so repeat once
+						line = line_sub(line, match, 1)
+					else: # if repeat char is kind of pattern then twice
+						line = line_sub(line, match, 2)
+				line = line_sub(line, match, 2)
+		else:
+			pass
+	except AttributeError:
+		pass
+	return line
 
 cleaner = ttext.ThaiTextUtility()
 for idx, row in pos_df.iterrows():
-    test_input = row['text']
-    inputs = [tlabel.get_input_labels(test_input)]
-    len_input = [len(test_input)]
-    # print(inputs, len_input)
+	test_input = row['text']
+	inputs = [tlabel.get_input_labels(test_input)]
+	len_input = [len(test_input)]
 
-    result = sess.run(g_outputs,
-        feed_dict={g_inputs: inputs, g_lengths: len_input, g_training: False})
+	result = sess.run(g_outputs,
+		feed_dict={g_inputs: inputs, g_lengths: len_input, g_training: False})
 
-    cut_word = split(test_input, nonzero(result))
-    cut_word = list(filter(lambda x: len(set(x)) > 1 or x == ' ', cut_word))
-    cut_word = list(map(lambda x: clean_word(x), cut_word))
-    suggest_word = list(map(lambda x: cleaner.lemmatize(x), cut_word))
-    
-    for idx, (word, alt) in enumerate(zip(cut_word, suggest_word)):
-        # print(word, alt)
-        if(len(alt) == 1):
-            cut_word[idx] = alt[0][0]
-    print('Before: ', row['text'])
-    print('After: ',''.join(cut_word))
-    print()
+	cut_word = split(test_input, nonzero(result))
+	cut_word = list(filter(lambda x: len(set(x)) > 1 or x == ' ', cut_word))
+	cut_word = list(map(lambda x: clean_word(x), cut_word))
+	suggest_word = list(map(lambda x: cleaner.lemmatize(x), cut_word))
+
+	for idx, (word, alt) in enumerate(zip(cut_word, suggest_word)):
+		if(len(alt) == 1):
+			cut_word[idx] = alt[0][0]
+	print('Before: ', row['text'])
+	print('After: ',''.join(cut_word))
+	print()
 
 # word vectorize
 
