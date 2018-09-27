@@ -51,6 +51,7 @@ def split(s, indices):
 util = ttext.ThaiTextUtility()
 for idx, row in pos_df.iterrows():
 	test_input = row['text']
+	test_input = clean.fixing(test_input)
 	inputs = [tlabel.get_input_labels(test_input)]
 	len_input = [len(test_input)]
 
