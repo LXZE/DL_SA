@@ -5,14 +5,14 @@ import time
 
 getTime = lambda : time.strftime("%Y-%m-%d %H:%M:%S")
 
-# clean
+# read and clean
 rawFileList = sorted(glob.glob('data/twit_*'))
 print(rawFileList)
 pathlib.Path('data/clean').mkdir(parents=True, exist_ok=True) 
 for file in rawFileList:
 	print('[{}] Cleaning {}'.format(getTime(), file))
 	# code = call(['python', 'clean.py', file])
-	code = call(['python', 'clean_parallel.py', file])
+	code = call(['python', 'twit_reader.py', file])
 	print('[{}] Finish cleaning {} with code {}'.format(getTime(), file, code))
 	print('-'*20)
 

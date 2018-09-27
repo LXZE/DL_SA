@@ -1,11 +1,12 @@
+import multiprocessing as mp
 import sys
 import csv
 import re
 import pandas as pd
-from pprint import PrettyPrinter
+import numpy as np
 import pythainlp as pyt
+from pprint import PrettyPrinter
 pp = PrettyPrinter(indent=4)
-
 # Pattern
 user_pattern = re.compile(r'@(\w){1,15}\s')
 emoji_pattern = re.compile("["
@@ -23,6 +24,7 @@ duplicate_space = re.compile(r'(\s{2,})')
 special_char = re.compile(r'&\S+;')
 non_char = re.compile(r'"|\'|\\|/|!|_|-|—|=|\+|\.|\n|\(|\)|\*|•|@|\?|\^|~|“|”|\[|\]|{|}|<|>|:|;|\|')
 
+# removing username, emoji, url, hashtag, or anykind of special character
 def cleanLine(line):
 	# pattern create and remove space
 	line = re.sub(user_pattern, ' ', line)
@@ -39,66 +41,48 @@ def cleanLine(line):
 
 	return line.replace('\n',' ')
 
+# filtering only thai, numerical and latin character
 non_thai_eng_pattern = re.compile(r'([^\u0E00-\u0E7Fa-zA-Z0-9฿%\s]+)')
 def filtering(line):
-	tmp = set()
 	non_thai_eng_pattern = re.compile(r'([^\u0E00-\u0E7Fa-zA-Z0-9#฿%\s]+)')
-	# non_char_set = set(re.findall(non_thai_eng_pattern, line))
-	# for n in non_char_set:
-	# 	tmp.update(n)
-	return [re.sub(non_thai_eng_pattern, '', line), tmp]
+	return re.sub(non_thai_eng_pattern, '', line)
 
+# removing whitespace
 def stripping(line):
 	tmp = line.lstrip(' ')
 	return tmp.rstrip(' ')
 
+# fixing, replacing any kind of pattern and error in Thai
 lol_pattern = re.compile(r'(5{2,}\+?)')
 vowel_error = re.compile(r'เเ')
-repeat_pattern = re.compile(r'(\S+?)\1+')
-# repeatable_char = ['อ', 'ร', 'ว', 'ย']
-# line_sub = lambda line, match, count: re.sub('{}'.format(match.group(0)), match.group(1)*count, line, count=1)
+repeat_pattern = re.compile(r'([^\d\s]+?)\1+')
+repeatable_char = ['อ', 'ร', 'ว', 'ย']
 def fixing(line):
 	line = re.sub(lol_pattern, 'lol', line)
 	line = re.sub(vowel_error, 'แ', line)
-	if bool(repeat_pattern.search(line)):
-		print(line)
 	line = re.sub(repeat_pattern, r'\1\1', line)
-	line = ''.join(list(filter(lambda word: len(word) > 1 or word == ' ', pyt.word_tokenize(line, engine='newmm'))))
+	# line = ''.join(list(filter(lambda word: len(word) > 1 or word == ' ', pyt.word_tokenize(line, engine='newmm'))))
 	return line
 
-try:
-	file = open(sys.argv[1],'r')
-	fileName = sys.argv[1].split('/')[-1].split('.')[0]
-except IndexError:
-	print('Please give the input file')
-	exit(0)
-except FileNotFoundError:
-	print('File not found')
-	exit(0)
-
-pattern = re.compile('\[\d{4}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}\],')
-tableData = pd.DataFrame(columns=['time','text'])
-
-# all_unwant = set()
-tmp = ''
-i=0
-for line in file.readlines():
-	if bool(pattern.search(line)):
-		result = stripping(tmp.replace('\ufeff',''))
-		[result, unwant] = filtering(result)
-		# all_unwant.update(unwant)
-		if len(result) == 0:
-			tmp = ''
-			continue
-		tableData = tableData.append({
-			'time': line[1:-3],
-			'text': stripping(fixing(result))
-		}, ignore_index=True)
-		tmp = ''
-		i+=1
-	else:
-		tmp += cleanLine(line)
-tableData.to_csv('data/clean/'+fileName+'_clean.csv', index=False,
-				quoting=csv.QUOTE_NONNUMERIC, doublequote=False, escapechar="\\")
-# TODO: print unwant char into some txt file, for further filtering
-# pp.pprint(all_unwant)
+line_sub = lambda line, match, count: re.sub('{}'.format(match.group(0)), match.group(1)*count, line, count=1)
+def clean_word(word):
+	try:
+		if bool(repeat_pattern.search(word)):
+			for match in repeat_pattern.finditer(word):
+				if match.group(1) in repeatable_char: # if match char set in repeatable list
+					pos = re.search(match.group(0),word).start()
+					if word[pos-1] in ['เ', 'แ'] or match.group(1) == 'ร': # if char before that repeat char is e|er-vowel or it's 'r' then twice
+						word = line_sub(word, match, 2)
+					else: # if char before not match condition then it should be once
+						word = line_sub(word, match, 1)
+				else: # if match char set not in repeatable char
+					if len(match.group(1)) == 1: # if not repeat char but match len = 1 so repeat once
+						word = line_sub(word, match, 1)
+					else: # if repeat char is kind of pattern then twice
+						word = line_sub(word, match, 2)
+				word = word_sub(word, match, 2)
+		else:
+			pass
+	except AttributeError:
+		pass
+	return word
