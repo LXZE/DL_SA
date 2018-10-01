@@ -56,30 +56,17 @@ def stripping(line):
 lol_pattern = re.compile(r'(5{2,}\+?)')
 vowel_error = re.compile(r'เเ')
 repeat_pattern = re.compile(r'([^\d\s]+?)\1+')
-repeatable_char = ['อ', 'ร', 'ว', 'ย']
 def fixing(line):
 	line = re.sub(lol_pattern, 'lol', line)
 	line = re.sub(vowel_error, 'แ', line)
 	line = re.sub(repeat_pattern, r'\1\1', line)
-	# line = ''.join(list(filter(lambda word: len(word) > 1 or word == ' ', pyt.word_tokenize(line, engine='newmm'))))
 	return line
 
-line_sub = lambda line, match, count: re.sub('{}'.format(match.group(0)), match.group(1)*count, line, count=1)
+word_sub = lambda line, match, count: re.sub('{}'.format(match.group(0)), match.group(1)*count, line, count=1)
 def clean_word(word):
 	try:
 		if bool(repeat_pattern.search(word)):
 			for match in repeat_pattern.finditer(word):
-				if match.group(1) in repeatable_char: # if match char set in repeatable list
-					pos = re.search(match.group(0),word).start()
-					if word[pos-1] in ['เ', 'แ'] or match.group(1) == 'ร': # if char before that repeat char is e|er-vowel or it's 'r' then twice
-						word = line_sub(word, match, 2)
-					else: # if char before not match condition then it should be once
-						word = line_sub(word, match, 1)
-				else: # if match char set not in repeatable char
-					if len(match.group(1)) == 1: # if not repeat char but match len = 1 so repeat once
-						word = line_sub(word, match, 1)
-					else: # if repeat char is kind of pattern then twice
-						word = line_sub(word, match, 2)
 				word = word_sub(word, match, 2)
 		else:
 			pass
