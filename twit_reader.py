@@ -33,7 +33,7 @@ def process(lines, core, acc_result):
 if __name__ == '__main__':
 
 	try:
-		file = open(sys.argv[1],'r')
+		file = open(sys.argv[1], 'r', encoding='utf8')
 		fileName = sys.argv[1].split('/')[-1].split('.')[0]
 	except IndexError:
 		print('Please give the input file')
