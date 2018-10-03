@@ -5,7 +5,6 @@ pattern = set()
 for lines in file.readlines():
 	word = lines[:-1]
 	if bool(repeat_pattern.search(word)):
-
 		for match in repeat_pattern.finditer(word):
 			g = match.group()
 			if(len(g) > 2):

@@ -59,17 +59,22 @@ repeat_pattern = re.compile(r'([^\d\s]+?)\1+')
 def fixing(line):
 	line = re.sub(lol_pattern, 'lol', line)
 	line = re.sub(vowel_error, 'แ', line)
-	line = re.sub(repeat_pattern, r'\1\1', line)
 	return line
+
+file = open('./utility/resource/thaiword.txt', 'r', encoding='utf8')
+word_dict = map(lambda line: line[:-1] ,file.readlines())
 
 word_sub = lambda line, match, count: re.sub('{}'.format(match.group(0)), match.group(1)*count, line, count=1)
 def clean_word(word):
+	res_word = word
 	try:
 		if bool(repeat_pattern.search(word)):
+			if word in word_dict:
+				return res_word
 			for match in repeat_pattern.finditer(word):
-				word = word_sub(word, match, 2)
+				res_word = word_sub(res_word, match, 2)
 		else:
 			pass
 	except AttributeError:
 		pass
-	return word
+	return res_word

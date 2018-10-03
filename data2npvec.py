@@ -49,7 +49,7 @@ def split(s, indices):
 	return [s[i:j] for i,j in zip(indices, indices[1:]+[None])]
 
 util = ttext.ThaiTextUtility()
-for idx, row in pos_df.iterrows():
+for idx, row in pos_df.iterrows()[:50]:
 	test_input = row['text']
 	test_input = clean.fixing(test_input)
 	inputs = [tlabel.get_input_labels(test_input)]
