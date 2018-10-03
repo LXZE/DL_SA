@@ -59,7 +59,7 @@ for idx, row in pos_df.iterrows()[:50]:
 		feed_dict={g_inputs: inputs, g_lengths: len_input, g_training: False})
 
 	cut_word = split(test_input, nonzero(result))
-	cut_word = list(filter(lambda x: len(set(x)) > 1 or x == ' ', cut_word))
+	# cut_word = list(filter(lambda x: len(set(x)) > 1 or x == ' ', cut_word))
 	cut_word = list(map(lambda x: clean.clean_word(x), cut_word))
 	suggest_word = list(map(lambda x: util.lemmatize(x), cut_word))
 
