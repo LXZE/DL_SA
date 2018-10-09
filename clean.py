@@ -58,6 +58,7 @@ vowel_error = re.compile(r'เเ')
 repeat_pattern = re.compile(r'([^\d\s]+?)\1+')
 def fixing(line):
 	line = re.sub(lol_pattern, ' lol ', line)
+	line = re.sub('ๆ+', 'ๆ', line)
 	line = re.sub(duplicate_space, ' ', line)
 	line = re.sub(vowel_error, 'แ', line)
 	return line
