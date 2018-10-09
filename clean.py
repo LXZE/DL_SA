@@ -22,7 +22,7 @@ hashtag_pattern = re.compile(r'(\#\S+)')
 duplicate_space = re.compile(r'(\s{2,})')
 
 special_char = re.compile(r'&\S+;')
-non_char = re.compile(r'"|\'|\\|/|!|_|-|—|=|\+|\.|\n|\(|\)|\*|•|@|\?|\^|~|“|”|\[|\]|{|}|<|>|:|;|\|')
+non_char = re.compile(r'"|\'|\\|/|!|_|-|—|=|\+|\.|\n|\(|\)|\*|&|•|@|\?|\^|~|“|”|\[|\]|{|}|<|>|:|;|\|')
 
 # removing username, emoji, url, hashtag, or anykind of special character
 def cleanLine(line):
@@ -57,7 +57,8 @@ lol_pattern = re.compile(r'(5{2,}\+?)')
 vowel_error = re.compile(r'เเ')
 repeat_pattern = re.compile(r'([^\d\s]+?)\1+')
 def fixing(line):
-	line = re.sub(lol_pattern, 'lol', line)
+	line = re.sub(lol_pattern, ' lol ', line)
+	line = re.sub(duplicate_space, ' ', line)
 	line = re.sub(vowel_error, 'แ', line)
 	return line
 

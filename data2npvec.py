@@ -67,6 +67,7 @@ for idx, row in pos_df.iterrows()[:50]:
 		if(len(alt) == 1):
 			cut_word[idx] = alt[0][0]
 	print('Before: ', row['text'])
+	print(cut_word)
 	print('After: ',''.join(cut_word))
 	print()
 
