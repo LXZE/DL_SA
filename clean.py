@@ -65,7 +65,6 @@ def fixing(line):
 
 file = open('./utility/resource/thaiword.txt', 'r', encoding='utf8')
 word_dict = map(lambda line: line[:-1] ,file.readlines())
-
 word_sub = lambda line, match, count: re.sub('{}'.format(match.group(0)), match.group(1)*count, line, count=1)
 def clean_word(word):
 	res_word = word
@@ -80,3 +79,11 @@ def clean_word(word):
 	except AttributeError:
 		pass
 	return res_word
+
+char_repeat_pattern = re.compile(r'([^\d\s]{1})\1+')
+def min_char(line):
+	pass
+	# TODO: check repeat size, (2,3 or more) then sub to only 2 or 3
+	# 2,3 might be word, else it would be intensifying
+	# line = word_sub()
+	return line

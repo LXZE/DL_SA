@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import glob, re, time
+import glob, re, time, sys
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 from subprocess import call
 import pythainlp as pyt
+from gensim.models import KeyedVectors
 import clean
-import sys
-sys.path.append('./ThaiTextUtility')
+sys.path.append('./utility')
 from ThaiTextUtility import ThaiTextUtility as ttext
 sys.path.append('./thai-word-segmentation')
 from thainlplib import ThaiWordSegmentLabeller as tlabel
@@ -49,8 +49,9 @@ def split(s, indices):
 	return [s[i:j] for i,j in zip(indices, indices[1:]+[None])]
 
 util = ttext.ThaiTextUtility()
-for idx, row in pos_df.iterrows()[:50]:
+for idx, row in pos_df.iterrows():
 	test_input = row['text']
+	# TODO: add more duplicate character cleaning here
 	test_input = clean.fixing(test_input)
 	inputs = [tlabel.get_input_labels(test_input)]
 	len_input = [len(test_input)]
@@ -59,7 +60,6 @@ for idx, row in pos_df.iterrows()[:50]:
 		feed_dict={g_inputs: inputs, g_lengths: len_input, g_training: False})
 
 	cut_word = split(test_input, nonzero(result))
-	# cut_word = list(filter(lambda x: len(set(x)) > 1 or x == ' ', cut_word))
 	cut_word = list(map(lambda x: clean.clean_word(x), cut_word))
 	suggest_word = list(map(lambda x: util.lemmatize(x), cut_word))
 
@@ -72,5 +72,14 @@ for idx, row in pos_df.iterrows()[:50]:
 	print()
 
 # word vectorize
+# vector_model_dir = '../model/thai2vec/word2vec/' 
+# vector_model_path = f'{vector_model_dir}thai2vec02.bin'
+
+# vector_model = KeyedVectors.load_word2vec_format(vector_model_path, binary=True)
+
+# word_dict = {}
+# for word in vector_model.index2word:
+# 	word_dict[word] = vector_model[word]
+# word_vec = pd.DataFrame.from_dict(word_dict, orient='index')
 
 # save vector as numpy for colab
