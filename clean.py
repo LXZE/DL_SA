@@ -4,7 +4,6 @@ import csv
 import re
 import pandas as pd
 import numpy as np
-import pythainlp as pyt
 from pprint import PrettyPrinter
 pp = PrettyPrinter(indent=4)
 # Pattern

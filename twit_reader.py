@@ -1,7 +1,5 @@
 import multiprocessing as mp
-import sys
-import csv
-import re
+import sys, csv, re, os
 import pandas as pd
 import numpy as np
 import clean
@@ -31,10 +29,12 @@ def process(lines, core, acc_result):
 	print('core {} finished'.format(core))
 
 if __name__ == '__main__':
-
 	try:
 		file = open(sys.argv[1], 'r', encoding='utf8')
-		fileName = sys.argv[1].split('/')[-1].split('.')[0]
+		if os.name == 'nt':
+			fileName = sys.argv[1].split('\\')[-1].split('.')[0]
+		else:
+			fileName = sys.argv[1].split('/')[-1].split('.')[0]
 	except IndexError:
 		print('Please give the input file')
 		exit(0)
