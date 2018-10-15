@@ -1,16 +1,15 @@
 import glob, re, time, sys
 import pandas as pd
 import numpy as np
-import tensorflow as tf
-from subprocess import call
-import pythainlp as pyt
 from gensim.models import KeyedVectors
+from gensim.models import FastText as fText
 import clean
 
 vector_model_dir = '../model/thai2vec/word2vec/' 
-vector_model_path = f'{vector_model_dir}thai2vec02.bin'
+vector_model_path_bin = f'{vector_model_dir}thai2vec02.bin'
+vector_model_path = f'{vector_model_dir}thai2vec02'
 
-vector_model = KeyedVectors.load_word2vec_format(vector_model_path, binary=True)
+vector_model = KeyedVectors.load_word2vec_format(vector_model_path_bin, binary=True)
 
 word_dict = {}
 for word in vector_model.index2word:
@@ -61,5 +60,9 @@ def edits2(word):
 	"All edits that are two edits away from `word`."
 	return (e2 for e1 in edits1(word) for e2 in edits1(e1))
 
-print(correction('เอไอเอส'))
+# model = fText.load_fasttext_format(vector_model_path)
+print(vector_model.get_word_vector('มาก'))
+print(vector_model.get_word_vector('มากก'))
+
+# print(correction('เอไอเอส'))
 # print(correction('นะค่ะ'))
