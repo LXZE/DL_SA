@@ -13,16 +13,17 @@ except FileNotFoundError:
 
 prop = [0, 0]
 thai_pattern = re.compile(r'([\u0E00-\u0E7F฿%]+)')
-rep = ['งง', 'สส']
+rep = ['งง', 'สส', 'นน', 'รร', 'ออ']
 for idx, row in dataset.iterrows():
 	sentence = row['text']
 	result = pyt.word_tokenize(sentence, engine='newmm')
+	crit2 = [len(token) == 2 and bool(thai_pattern.search(token)) and token[0] == token[1] and (token not in rep) for idx, token in enumerate(result)]
+	res2 = [(result[idx-1: idx+1]) for idx, log in enumerate(crit2) if log]
 	if any([len(token) == 1 and bool(thai_pattern.search(token)) for token in result]):
-		# print(result)
 		prop[0] += 1
-	elif any([len(token) == 2 and bool(thai_pattern.search(token)) and token[0] == token[1] and (token not in rep) for token in result]):
+	elif any(crit2):
 		prop[0] += 1
-		print(result)
+		print(res2)
 	else:
 		prop[1] += 1
 print(prop)
