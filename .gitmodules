@@ -7,6 +7,3 @@
 [submodule "lexicon-thai"]
 	path = lexicon-thai
 	url = https://github.com/PyThaiNLP/lexicon-thai
-[submodule "Thai_word_fixer"]
-	path = Thai_word_fixer
-	url = https://github.com/LXZE/Thai_word_fixer
