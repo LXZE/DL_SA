@@ -1,7 +1,5 @@
-import multiprocessing as mp
-import sys
-import csv
-import re
+# -*- coding: utf-8 -*-
+import sys, csv, re
 import pandas as pd
 import numpy as np
 from pprint import PrettyPrinter
@@ -79,10 +77,24 @@ def clean_word(word):
 		pass
 	return res_word
 
+thai_pattern = re.compile(r'([\u0E00-\u0E7F฿%]+)')
 char_repeat_pattern = re.compile(r'([^\d\s]{1})\1+')
 def min_char(line):
 	pass
 	# TODO: check repeat size, (2,3 or more) then sub to only 2 or 3
 	# 2,3 might be word, else it would be intensifying
 	# line = word_sub()
+	try:
+		if bool(char_repeat_pattern.search(line)):
+			for match in char_repeat_pattern.finditer(line):
+				if len(match.group(0)) in [2,3]:
+					pass
+				else:
+					line = word_sub(line, match, 2)
+				# if len(match.group(1)
+				# line = word_sub(line, match, 2)
+
+	except AttributeError:
+		pass
+	
 	return line
