@@ -1,1 +1,1 @@
-ThaiTextUtility/resource
+utility/resource

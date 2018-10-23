@@ -47,11 +47,9 @@ def nonzero(a):
 	return [i for i,e in enumerate(a) if e != 0]
 def split(s, indices):
 	return [s[i:j] for i,j in zip(indices, indices[1:]+[None])]
-
-util = ttext.ThaiTextUtility()
+util = ttext()
 for idx, row in pos_df.iterrows():
 	test_input = row['text']
-	# TODO: add more duplicate character cleaning here
 	test_input = clean.fixing(test_input)
 	inputs = [tlabel.get_input_labels(test_input)]
 	len_input = [len(test_input)]
