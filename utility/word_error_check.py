@@ -8,13 +8,14 @@ import pandas as pd
 import numpy as np
 import pythainlp as pyt
 import clean
+import time
 
 thai_pattern = re.compile(r'([\u0E00-\u0E7F฿%]+)')
 char_repeat_pattern = re.compile(r'([^\d\s]{1})\1+')
 def process(df, core, acc_result):
 	print('core {} started'.format(core))
 	pattern_count = {}
-	for idx, row in dataset.iterrows():
+	for idx, row in df.iterrows():
 		sentence = clean.fixing(row['text'])
 		result = pyt.word_tokenize(sentence, engine='newmm')
 
@@ -30,7 +31,7 @@ def process(df, core, acc_result):
 					pattern_count[patt] += 1 
 				else:
 					pattern_count[patt] = 1
-	acc_result.append(pattern_count)
+	acc_result.append((core, pattern_count))
 	print('core {} finished'.format(core))
 
 if __name__ == '__main__':
@@ -50,14 +51,29 @@ if __name__ == '__main__':
 	dfs = [dataset[i::ncore] for i in range(ncore)]
 	processes = [mp.Process(target=process, args=(dfs[core], core, output_list)) for core in range(ncore)]
 
-	for p in processes:
+	for i, p in enumerate(processes):
 		p.start()
+
+	if os.name == 'nt':
+		# MP is likely to broke when running in windows, so I put this to stop the hang process.
+		while True:
+			time.sleep(1)
+			alive = [(i, p.pid) for i, p in enumerate(processes) if p.is_alive()]
+			if alive:
+				print(len(alive), 'processes alive; among them:', alive)
+				if len(alive) == 1:
+					processes[alive[0][0]].terminate()
+			else:
+				print('no process alive now')
+				break
+
 	for p in processes:
 		p.join()
-
+	
+	print('interpret accumulate result')
+	print(list(map(lambda x: x[0], output_list)))
 	res_dict = ddict(int)
-	print(output_list)
-	for k,v in chain.from_iterable([res.items() for res in output_list]):
+	for k,v in chain.from_iterable([res.items() for _, res in output_list]):
 		res_dict[k] += v
 	patt_dict = [(k, res_dict[k]) for k in sorted(res_dict, key=res_dict.get, reverse=True)]
 	file = open('error.txt', 'w', encoding='utf8')

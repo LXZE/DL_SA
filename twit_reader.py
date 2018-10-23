@@ -6,6 +6,7 @@ import clean
 
 time_log_pattern = re.compile('\[\d{4}/\d{2}/\d{2}-(?:\d{1,2}:){2}\d{1,2}\],\n')
 def process(lines, core, acc_result):
+	print('core {} started'.format(core))
 	tableData = pd.DataFrame(columns=['time','text'])
 	tmp = ''
 	i=0
