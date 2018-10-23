@@ -58,6 +58,7 @@ def fixing(line):
 	line = re.sub('ๆ+', 'ๆ', line)
 	line = re.sub(duplicate_space, ' ', line)
 	line = re.sub(vowel_error, 'แ', line)
+	line = min_char(line)
 	return line
 
 file = open('./utility/resource/thaiword.txt', 'r', encoding='utf8')
@@ -77,17 +78,20 @@ def clean_word(word):
 		pass
 	return res_word
 
+thai_vowel = 'ะัาำิีึืุูเแโใไ็่้๊๋์'
 thai_pattern = re.compile(r'([\u0E00-\u0E7F฿%]+)')
 char_repeat_pattern = re.compile(r'([^\d\s]{1})\1+')
 def min_char(line):
 	pass
 	# TODO: check repeat size, (2,3 or more) then sub to only 2 or 3
 	# 2,3 might be word, else it would be intensifying
-	# line = word_sub()
+	# if char repeat == vowel then sub to 1
 	try:
 		if bool(char_repeat_pattern.search(line)):
 			for match in char_repeat_pattern.finditer(line):
-				if len(match.group(0)) in [2,3]:
+				if match.group(1) in thai_vowel:
+					line = word_sub(line, match, 1)
+				elif len(match.group(0)) in [2,3]:
 					pass
 				else:
 					line = word_sub(line, match, 2)

@@ -27,7 +27,7 @@ def process(lines, core, acc_result):
 					continue
 				patt = '+'.join(patt)
 				if patt in pattern_count:
-					pattern_count[patt] += 1 
+					pattern_count[patt] += 1
 				else:
 					pattern_count[patt] = 1
 
@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
 	for p in processes:
 		p.join()
-	
+
 	print('interpret accumulate result')
 	print(list(map(lambda x: x[0], output_list)))
 	res_dict = ddict(int)
