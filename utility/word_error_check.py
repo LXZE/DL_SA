@@ -12,16 +12,15 @@ import time
 
 thai_pattern = re.compile(r'([\u0E00-\u0E7F฿%]+)')
 char_repeat_pattern = re.compile(r'([^\d\s]{1})\1+')
-def process(df, core, acc_result):
+def process(lines, core, acc_result):
 	print('core {} started'.format(core))
 	pattern_count = {}
-	for idx, row in df.iterrows():
-		sentence = clean.fixing(row['text'])
+	for idx, line in enumerate(lines):
+		sentence = clean.fixing(line)
 		result = pyt.word_tokenize(sentence, engine='newmm')
 
 		crit0 = [bool(char_repeat_pattern.search(token)) and bool(thai_pattern.search(token)) for token in result]
 		res0 = [(result[idx-1: idx+1]) for idx, log in enumerate(crit0) if log]
-
 		if any(crit0):
 			for patt in res0:
 				if len(patt) == 0 or patt[0] == ' ':
@@ -31,6 +30,7 @@ def process(df, core, acc_result):
 					pattern_count[patt] += 1 
 				else:
 					pattern_count[patt] = 1
+
 	acc_result.append((core, pattern_count))
 	print('core {} finished'.format(core))
 
@@ -48,24 +48,29 @@ if __name__ == '__main__':
 	ncore = mp.cpu_count()
 	output_list = mp.Manager().list()
 
-	dfs = [dataset[i::ncore] for i in range(ncore)]
-	processes = [mp.Process(target=process, args=(dfs[core], core, output_list)) for core in range(ncore)]
+	all_line = dataset['text'].tolist()
+	line_chunks = np.array_split(all_line, ncore)
+	processes = [mp.Process(target=process, args=(line_chunks[core], core, output_list)) for core in range(ncore)]
 
 	for i, p in enumerate(processes):
 		p.start()
 
-	if os.name == 'nt':
-		# MP is likely to broke when running in windows, so I put this to stop the hang process.
-		while True:
-			time.sleep(1)
-			alive = [(i, p.pid) for i, p in enumerate(processes) if p.is_alive()]
-			if alive:
-				print(len(alive), 'processes alive; among them:', alive)
-				if len(alive) == 1:
-					processes[alive[0][0]].terminate()
-			else:
-				print('no process alive now')
-				break
+	# if os.name == 'nt':
+	# 	# MP is likely to broke when running in windows, so I put this to stop the hang process.
+	#   # After reproduce a several attempt on data distribution, let process consume more ram make this works.
+	#   # I don't know why.
+	# 	while True:
+	# 		time.sleep(1)
+	# 		alive = [(i, p.pid) for i, p in enumerate(processes) if p.is_alive()]
+	# 		if alive:
+	# 			print(len(alive), 'processes alive; among them:', alive)
+	# 			if len(alive) == 1:
+	# 				pass
+	# 				# processes[alive[0][0]].terminate()
+	# 				# break
+	# 		else:
+	# 			print('no process alive now')
+	# 			break
 
 	for p in processes:
 		p.join()
