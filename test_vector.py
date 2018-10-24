@@ -2,7 +2,7 @@ import glob, re, time, sys
 import pandas as pd
 import numpy as np
 from gensim.models import KeyedVectors
-import fastText as ft
+# import fastText as ft
 import clean
 
 vector_model_dir = '../model/thai2vec/word2vec/' 
@@ -39,7 +39,6 @@ def correction(word):
 
 def candidates(word): 
 	"Generate possible spelling corrections for word."
-	print(known([word]), known(edits1(word)), known(edits2(word)), [word])
 	return (known([word]) or known(edits1(word)) or known(edits2(word)) or [word])
 
 def known(words): 
@@ -60,11 +59,11 @@ def edits2(word):
 	"All edits that are two edits away from `word`."
 	return (e2 for e1 in edits1(word) for e2 in edits1(e1))
 
-path = '../model/cc.th.300.bin'
-model = ft.load_model(path)
+# path = '../model/cc.th.300.bin'
+# model = ft.load_model(path)
 # model = fText.load_model(vector_model_dir)
-print(model.get_word_vector('มาก'))
-print(model.get_word_vector('มากก'))
+# print(model.get_word_vector('มาก'))
+# print(model.get_word_vector('มากก'))
 
 # print(correction('เอไอเอส'))
 # print(correction('นะค่ะ'))

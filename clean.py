@@ -50,6 +50,7 @@ def stripping(line):
 	return tmp.rstrip(' ')
 
 # fixing, replacing any kind of pattern and error in Thai
+# TODO: make lol pattern more fluid ex: 55556655 ถถถถถถ ๕๕๕๕๕๕๕ 
 lol_pattern = re.compile(r'(5{2,}\+?)')
 vowel_error = re.compile(r'เเ')
 repeat_pattern = re.compile(r'([^\d\s]+?)\1+')
