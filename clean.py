@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import sys, csv, re
 import pandas as pd
 import numpy as np
@@ -50,8 +51,7 @@ def stripping(line):
 	return tmp.rstrip(' ')
 
 # fixing, replacing any kind of pattern and error in Thai
-# TODO: make lol pattern more fluid ex: 55556655 ถถถถถถ ๕๕๕๕๕๕๕ 
-lol_pattern = re.compile(r'(5{2,}\+?)')
+lol_pattern = re.compile(r'([56]{2,}\+?)|(ถ{2,}\+?)|(๕{2,}\+?)')
 vowel_error = re.compile(r'เเ')
 repeat_pattern = re.compile(r'([^\d\s]+?)\1+')
 def fixing(line):
@@ -80,6 +80,9 @@ def clean_word(word):
 	return res_word
 
 thai_vowel = 'ะัาำิีึืุูเแโใไ็่้๊๋์'
+# NOTE: ก 0e01 ๙ 0e59 โคมูตร จาถิ 0e5b
+# be able to use unicode char inside bracket directly
+# for example [ะ-ไ] [เ-ไ]
 thai_pattern = re.compile(r'([\u0E00-\u0E7F฿%]+)')
 char_repeat_pattern = re.compile(r'([^\d\s]{1})\1+')
 def min_char(line):
@@ -101,5 +104,4 @@ def min_char(line):
 
 	except AttributeError:
 		pass
-	
 	return line
