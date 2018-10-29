@@ -7,6 +7,7 @@ import itertools
 import pandas as pd
 import numpy as np
 from subprocess import call
+import multiprocessing as mp
 import pythainlp as pyt
 from gensim.models import KeyedVectors
 import clean
@@ -22,7 +23,6 @@ parser.add_argument('-n', '--no_tensor', nargs='?', const=True, help='use when n
 args, leftovers = parser.parse_known_args()
 
 # import data with label
-# fileList = sorted(glob.glob('../dataset/'))
 # fileList = ['data/test.txt', '../dataset/pos.txt', '../dataset/neg.txt']
 fileList = ['../dataset/pos.txt', '../dataset/neg.txt']
 files = []
@@ -61,7 +61,8 @@ util = ttext()
 def tokenize(df):
 	tokenized_sentence = []
 
-	for idx, row in itertools.islice(df.iterrows(), 20):
+	# for idx, row in itertools.islice(df.iterrows(), 5):
+	for idx, row in df.iterrows():
 		test_input = row['text']
 		test_input = clean.fixing(test_input)
 
@@ -92,10 +93,36 @@ def tokenize(df):
 
 	return tokenized_sentence
 
-list_sentence_pos = tokenize(pos_df)
-list_vector_pos = []
-list_sentence_neg = tokenize(neg_df)
+ncore = mp.cpu_count()
+pool = mp.Pool(ncore)
+# df_split = np.array_split(pos_df, ncore, axis=1)
+dfs = [pos_df[i::ncore] for i in range(ncore)]
+list_sentence_pos = sum(pool.map(tokenize, dfs), [])
+dfs = [neg_df[i::ncore] for i in range(ncore)]
+list_sentence_neg = sum(pool.map(tokenize, dfs), [])
+pool.close()
+pool.join()
+# list_sentence_pos = tokenize(pos_df)
+# list_vector_pos = []
+# list_sentence_neg = tokenize(neg_df)
 
+# find max length of sentence
+len_max = 0
+for sentence in list_sentence_pos:
+	print(sentence)
+	if len(sentence) > len_max:
+		len_max = len(sentence)
+for sentence in list_sentence_neg:
+	print(sentence)
+	if len(sentence) > len_max:
+		len_max = len(sentence)
+# print(len_max) # 84
+# then let input length = 100
+# vocab size maybe 60000+2+n (n can be found from traverse through our data set)
+# weight of pre-trained database will be imported and added with new vocab
+# new vocab's vector can generate with all zeros, all random, average from top nearest k words
+# if use keras then make it trainable
+'''
 # word vectorize
 # TODO: load this model and train it again (transfer learning)
 # put unfounded vocab by averaging a value or randomized
@@ -118,8 +145,8 @@ for sentence in list_sentence_pos:
 		else:
 			tmp.append(word_dict[token])
 	list_vector_pos.append(tmp)
-print(np.narray(list_vector_pos))
-
+print(list(zip(list_sentence_pos, np.array(list_vector_pos))))
+'''
 # TODO: make data structure suitable for lstm and can be transfer to anywhere as numpy format
 # NOTE: Compare between (fix oov|mean oov|ignore oov)*(newmm|bi-lstm|deepcut)*(thai2vec|our embed)*(twit data|wongnai data)
 # save vector as numpy for colab

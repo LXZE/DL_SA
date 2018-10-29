@@ -5,24 +5,6 @@ from gensim.models import KeyedVectors
 # import fastText as ft
 import clean
 
-vector_model_dir = '../model/thai2vec/word2vec/' 
-vector_model_path_bin = f'{vector_model_dir}thai2vec02.bin'
-vector_model_path = f'{vector_model_dir}thai2vec02'
-
-vector_model = KeyedVectors.load_word2vec_format(vector_model_path_bin, binary=True)
-
-word_dict = {}
-for word in vector_model.index2word:
-	word_dict[word] = vector_model[word]
-word_vec = pd.DataFrame.from_dict(word_dict, orient='index')
-
-words = vector_model.index2word
-
-w_rank = {}
-for i,word in enumerate(words):
-	w_rank[word] = i
-WORDS = w_rank
-
 thai_letters = 'กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤฤๅลฦฦๅวศษสหฬอฮะัาำิีึืุูเแโใไ็่้๊๋์'
 
 def words(text): return re.findall(r'\w+', text.lower())
@@ -58,6 +40,34 @@ def edits1(word):
 def edits2(word): 
 	"All edits that are two edits away from `word`."
 	return (e2 for e1 in edits1(word) for e2 in edits1(e1))
+
+vector_model_dir = '../model/thai2vec/word2vec/' 
+vector_model_path_bin = f'{vector_model_dir}thai2vec02.bin'
+vector_model_path = f'{vector_model_dir}thai2vec02'
+
+vector_model = KeyedVectors.load_word2vec_format(vector_model_path_bin, binary=True)
+
+word_dict = {}
+for word in vector_model.index2word:
+	word_dict[word] = vector_model[word]
+word_vec = pd.DataFrame.from_dict(word_dict, orient='index')
+
+words = vector_model.index2word
+
+w_rank = {}
+for i,word in enumerate(words):
+	w_rank[word] = i
+WORDS = w_rank
+
+VOCAB_SIZE = 100000
+VEC_DIM = 300
+embed_matrix = np.zeros((VOCAB_SIZE, VEC_DIM))
+
+
+
+
+
+
 
 # path = '../model/cc.th.300.bin'
 # model = ft.load_model(path)
