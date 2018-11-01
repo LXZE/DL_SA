@@ -61,7 +61,7 @@ util = ttext()
 def tokenize(df):
 	tokenized_sentence = []
 
-	# for idx, row in itertools.islice(df.iterrows(), 5):
+	# for idx, row in itertools.islice(df.iterrows(), 2):
 	for idx, row in df.iterrows():
 		test_input = row['text']
 		test_input = clean.fixing(test_input)
@@ -84,45 +84,29 @@ def tokenize(df):
 		for idx, (word, alt) in enumerate(zip(cut_word, suggest_word)):
 			if(len(alt) == 1):
 				cut_word[idx] = alt[0][0]
-		# print('Before: ', row['text'])
-		cut_word = list(filter(lambda token: token != ' ', cut_word))
-		# print(cut_word)
+		# cut_word = list(filter(lambda token: token != ' ', cut_word))
 		tokenized_sentence.append(cut_word)
-		# print('After: ',''.join(cut_word))
-		# print()
 
 	return tokenized_sentence
 
 ncore = mp.cpu_count()
 pool = mp.Pool(ncore)
 # df_split = np.array_split(pos_df, ncore, axis=1)
+# NOTE: senquence in list of sentence is not in order after distributed through pool
 dfs = [pos_df[i::ncore] for i in range(ncore)]
 list_sentence_pos = sum(pool.map(tokenize, dfs), [])
 dfs = [neg_df[i::ncore] for i in range(ncore)]
 list_sentence_neg = sum(pool.map(tokenize, dfs), [])
 pool.close()
 pool.join()
-# list_sentence_pos = tokenize(pos_df)
-# list_vector_pos = []
-# list_sentence_neg = tokenize(neg_df)
 
-# find max length of sentence
-len_max = 0
-for sentence in list_sentence_pos:
-	print(sentence)
-	if len(sentence) > len_max:
-		len_max = len(sentence)
-for sentence in list_sentence_neg:
-	print(sentence)
-	if len(sentence) > len_max:
-		len_max = len(sentence)
-# print(len_max) # 84
 # then let input length = 100
 # vocab size maybe 60000+2+n (n can be found from traverse through our data set)
 # weight of pre-trained database will be imported and added with new vocab
 # new vocab's vector can generate with all zeros, all random, average from top nearest k words
 # if use keras then make it trainable
-'''
+
+
 # word vectorize
 # TODO: load this model and train it again (transfer learning)
 # put unfounded vocab by averaging a value or randomized
@@ -137,16 +121,63 @@ for word in vector_model.index2word:
 word_vec = pd.DataFrame.from_dict(word_dict, orient='index')
 words = vector_model.index2word
 
-for sentence in list_sentence_pos:
-	tmp = []
-	for token in sentence:
-		if token not in words:
-			print(f'OOV -> {token}')
+input_len = 100
+pad_token = '_pad_'
+unk_token = '_unk_'
+spc_token = '_space_'
+
+def sub_space(tok_sentence):
+	return list(map(lambda token: '_space_' if token == ' ' else token, tok_sentence))
+
+def pad_sentence(tok_sentence):
+	return tok_sentence + [pad_token] * (input_len - len(tok_sentence))
+
+def sub_unk(tok_sentence):
+	return list(map(lambda token: unk_token if token not in words else token, tok_sentence))
+
+def rm_unk(tok_sentence):
+	return list(filter(lambda token: token in words, tok_sentence))
+
+def rm_dup_spc(tok_sentence):
+	res = []
+	for token in tok_sentence:
+		if token == spc_token and res[-1] == token:
+			print(res)
+			pass
 		else:
-			tmp.append(word_dict[token])
-	list_vector_pos.append(tmp)
-print(list(zip(list_sentence_pos, np.array(list_vector_pos))))
-'''
+			res.append(token)
+	return res
+
+# 2 approaches
+# 1: sub all unknown word with token _unk_ before pad
+# 2: ignore all unknown word then padding to input len
+approach = 1
+def token_prepare(tok_sentence):
+	tmp = tok_sentence
+	if approach == 1:
+		tmp = sub_space(tmp)
+		tmp = pad_sentence(tmp)
+		tmp = sub_unk(tmp)
+	else:
+		tmp = rm_unk(tmp)
+		tmp = rm_dup_spc(tmp)
+		tmp = pad_sentence(tmp)
+	return tmp
+list_sentence_pos = list(map(lambda sen: token_prepare(sen), list_sentence_pos))
+list_sentence_neg = list(map(lambda sen: token_prepare(sen), list_sentence_neg))
+
+def sen2vec(tok_sentence):
+	tmp = []
+	for token in tok_sentence:
+		tmp.append(word_dict[token])
+	return tmp
+
+list_vector_pos = np.array(list(map(lambda sen: sen2vec(sen), list_sentence_pos)))
+list_vector_neg = np.array(list(map(lambda sen: sen2vec(sen), list_sentence_neg)))
+
+np.save('pos.npy', list_vector_pos)
+np.save('neg.npy', list_vector_neg)
+
 # TODO: make data structure suitable for lstm and can be transfer to anywhere as numpy format
 # NOTE: Compare between (fix oov|mean oov|ignore oov)*(newmm|bi-lstm|deepcut)*(thai2vec|our embed)*(twit data|wongnai data)
 # save vector as numpy for colab

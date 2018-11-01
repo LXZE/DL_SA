@@ -2,7 +2,6 @@ import glob, re, time, sys
 import pandas as pd
 import numpy as np
 from gensim.models import KeyedVectors
-# import fastText as ft
 import clean
 
 thai_letters = 'กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤฤๅลฦฦๅวศษสหฬอฮะัาำิีึืุูเแโใไ็่้๊๋์'
@@ -62,18 +61,3 @@ WORDS = w_rank
 VOCAB_SIZE = 100000
 VEC_DIM = 300
 embed_matrix = np.zeros((VOCAB_SIZE, VEC_DIM))
-
-
-
-
-
-
-
-# path = '../model/cc.th.300.bin'
-# model = ft.load_model(path)
-# model = fText.load_model(vector_model_dir)
-# print(model.get_word_vector('มาก'))
-# print(model.get_word_vector('มากก'))
-
-# print(correction('เอไอเอส'))
-# print(correction('นะค่ะ'))
