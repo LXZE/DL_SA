@@ -22,9 +22,12 @@ parser = argparse.ArgumentParser(description='process text to npy')
 parser.add_argument('-n', '--no_tensor', nargs='?', const=True, help='use when no tensorflow installed')
 args, leftovers = parser.parse_known_args()
 
+pos_name = 'pos'
+neg_name = 'wn_neg'
+
 # import data with label
 # fileList = ['data/test.txt', '../dataset/pos.txt', '../dataset/neg.txt']
-fileList = ['../dataset/pos.txt', '../dataset/neg.txt']
+fileList = [f'../dataset/{pos_name}.txt', f'../dataset/{neg_name}.txt']
 files = []
 for idx, fileName in enumerate(fileList):
 	open_file = open(fileName, 'r')
@@ -79,12 +82,11 @@ def tokenize(df):
 			cut_word = pyt.word_tokenize(test_input, engine='newmm')
 
 		cut_word = list(map(lambda x: clean.clean_word(x), cut_word))
+		# TODO: make suggestion word substitution depends on variable
 		suggest_word = list(map(lambda x: util.lemmatize(x), cut_word))
-
 		for idx, (word, alt) in enumerate(zip(cut_word, suggest_word)):
 			if(len(alt) == 1):
 				cut_word[idx] = alt[0][0]
-		# cut_word = list(filter(lambda token: token != ' ', cut_word))
 		tokenized_sentence.append(cut_word)
 
 	return tokenized_sentence
@@ -105,7 +107,6 @@ pool.join()
 # weight of pre-trained database will be imported and added with new vocab
 # new vocab's vector can generate with all zeros, all random, average from top nearest k words
 # if use keras then make it trainable
-
 
 # word vectorize
 # TODO: load this model and train it again (transfer learning)
@@ -175,8 +176,8 @@ def sen2vec(tok_sentence):
 list_vector_pos = np.array(list(map(lambda sen: sen2vec(sen), list_sentence_pos)))
 list_vector_neg = np.array(list(map(lambda sen: sen2vec(sen), list_sentence_neg)))
 
-np.save('pos.npy', list_vector_pos)
-np.save('neg.npy', list_vector_neg)
+np.save(f'{pos_name}.npy', list_vector_pos)
+np.save(f'{neg_name}.npy', list_vector_neg)
 
 # TODO: make data structure suitable for lstm and can be transfer to anywhere as numpy format
 # NOTE: Compare between (fix oov|mean oov|ignore oov)*(newmm|bi-lstm|deepcut)*(thai2vec|our embed)*(twit data|wongnai data)

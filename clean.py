@@ -86,8 +86,6 @@ thai_vowel = 'ะัาำิีึืุูเแโใไ็่้๊๋์'
 thai_pattern = re.compile(r'([\u0E00-\u0E7F฿%]+)')
 char_repeat_pattern = re.compile(r'([^\d\s]{1})\1+')
 def min_char(line):
-	pass
-	# TODO: check repeat size, (2,3 or more) then sub to only 2 or 3
 	# 2,3 might be word, else it would be intensifying
 	# if char repeat == vowel then sub to 1
 	try:
@@ -99,9 +97,6 @@ def min_char(line):
 					pass
 				else:
 					line = word_sub(line, match, 2)
-				# if len(match.group(1)
-				# line = word_sub(line, match, 2)
-
 	except AttributeError:
 		pass
 	return line
