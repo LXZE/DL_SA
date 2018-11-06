@@ -178,7 +178,3 @@ list_vector_neg = np.array(list(map(lambda sen: sen2vec(sen), list_sentence_neg)
 
 np.save(f'{pos_name}.npy', list_vector_pos)
 np.save(f'{neg_name}.npy', list_vector_neg)
-
-# TODO: make data structure suitable for lstm and can be transfer to anywhere as numpy format
-# NOTE: Compare between (fix oov|mean oov|ignore oov)*(newmm|bi-lstm|deepcut)*(thai2vec|our embed)*(twit data|wongnai data)
-# save vector as numpy for colab
