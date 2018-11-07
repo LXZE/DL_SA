@@ -9,6 +9,7 @@ import numpy as np
 from subprocess import call
 import multiprocessing as mp
 import pythainlp as pyt
+import dill as pickle
 from gensim.models import KeyedVectors
 import clean
 sys.path.append('./utility')
@@ -23,7 +24,7 @@ parser.add_argument('-n', '--no_tensor', nargs='?', const=True, help='use when n
 args, leftovers = parser.parse_known_args()
 
 pos_name = 'pos'
-neg_name = 'wn_neg'
+neg_name = 'neg'
 
 # import data with label
 # fileList = ['data/test.txt', '../dataset/pos.txt', '../dataset/neg.txt']
@@ -102,6 +103,9 @@ list_sentence_neg = sum(pool.map(tokenize, dfs), [])
 pool.close()
 pool.join()
 
+# pickle.dump(list_sentence_pos, open('../dataset/pos_tok.pkl', 'wb'))
+# pickle.dump(list_sentence_neg, open('../dataset/neg_tok.pkl', 'wb'))
+
 # then let input length = 100
 # vocab size maybe 60000+2+n (n can be found from traverse through our data set)
 # weight of pre-trained database will be imported and added with new vocab
@@ -109,9 +113,10 @@ pool.join()
 # if use keras then make it trainable
 
 # word vectorize
-# TODO: load this model and train it again (transfer learning)
-# put unfounded vocab by averaging a value or randomized
-vector_model_dir = '../model/thai2vec/word2vec/' 
+# export modified embedding matrix vector instead of make sentence become list vector
+# then convert word to int form instead of vector form
+# counting unknown word for further development
+vector_model_dir = '../model/thai2vec/word2vec/'
 vector_model_path = f'{vector_model_dir}thai2vec02.bin'
 
 vector_model = KeyedVectors.load_word2vec_format(vector_model_path, binary=True)
@@ -133,6 +138,7 @@ def sub_space(tok_sentence):
 def pad_sentence(tok_sentence):
 	return tok_sentence + [pad_token] * (input_len - len(tok_sentence))
 
+# TODO: save unknown for adding as a new word in dictionary
 def sub_unk(tok_sentence):
 	return list(map(lambda token: unk_token if token not in words else token, tok_sentence))
 
