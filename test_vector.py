@@ -54,10 +54,16 @@ word_dict['_lol_'] = vector_model['555']
 for word in vector_model.index2word:
 	word_dict[word] = vector_model[word]
 word_vec = pd.DataFrame.from_dict(word_dict, orient='index')
-itos = vector_model.index2word
 
+itos = vector_model.index2word
 itos.insert(0, '_lol_')
 stoi = ddict(lambda: 0, {v:k for k,v in enumerate(itos)})
+
+# embedding_dim = 300
+# embedding_matrix = np.zeros((len(itos), embedding_dim))
+# for key, vec in word_dict.items():
+# 	embedding_matrix[stoi[key]] = vec
+# np.save('../model/vec.npy', embedding_matrix)
 
 pos_tok = pickle.load(open('../dataset/pos_tok.pkl', 'rb'))
 neg_tok = pickle.load(open('../dataset/neg_tok.pkl', 'rb'))

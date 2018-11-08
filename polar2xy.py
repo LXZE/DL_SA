@@ -1,8 +1,8 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
 
-pos = np.load('../model/pos.npy')
-neg = np.load('../model/neg.npy')
+pos = np.load('../model/wn_pos_int.npy')
+neg = np.load('../model/wn_neg_int.npy')
 
 x = np.concatenate((pos,neg), axis = 0)
 y = np.concatenate(

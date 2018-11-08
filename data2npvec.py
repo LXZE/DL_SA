@@ -23,8 +23,8 @@ parser = argparse.ArgumentParser(description='process text to npy')
 parser.add_argument('-n', '--no_tensor', nargs='?', const=True, help='use when no tensorflow installed')
 args, leftovers = parser.parse_known_args()
 
-pos_name = 'pos'
-neg_name = 'neg'
+pos_name = 'wn_pos'
+neg_name = 'wn_neg'
 
 # import data with label
 # fileList = ['data/test.txt', '../dataset/pos.txt', '../dataset/neg.txt']
@@ -103,15 +103,15 @@ list_sentence_neg = sum(pool.map(tokenize, dfs), [])
 pool.close()
 pool.join()
 
-# pickle.dump(list_sentence_pos, open('../dataset/pos_tok.pkl', 'wb'))
-# pickle.dump(list_sentence_neg, open('../dataset/neg_tok.pkl', 'wb'))
+pickle.dump(list_sentence_pos, open(f'../dataset/{pos_name}_tok.pkl', 'wb'))
+pickle.dump(list_sentence_neg, open(f'../dataset/{neg_name}_tok.pkl', 'wb'))
 
 # then let input length = 100
 # vocab size maybe 60000+2+n (n can be found from traverse through our data set)
 # weight of pre-trained database will be imported and added with new vocab
 # new vocab's vector can generate with all zeros, all random, average from top nearest k words
 # if use keras then make it trainable
-
+'''
 # word vectorize
 # export modified embedding matrix vector instead of make sentence become list vector
 # then convert word to int form instead of vector form
@@ -183,4 +183,4 @@ list_vector_pos = np.array(list(map(lambda sen: sen2vec(sen), list_sentence_pos)
 list_vector_neg = np.array(list(map(lambda sen: sen2vec(sen), list_sentence_neg)))
 
 np.save(f'{pos_name}.npy', list_vector_pos)
-np.save(f'{neg_name}.npy', list_vector_neg)
+np.save(f'{neg_name}.npy', list_vector_neg)'''

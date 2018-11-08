@@ -50,7 +50,7 @@ def stripping(line):
 	tmp = line.lstrip(' ')
 	return tmp.rstrip(' ')
 
-# fixing, replacing any kind of pattern and error in Thai
+# fixing, lower, replacing any kind of pattern and error in Thai
 lol_pattern = re.compile(r'([56]{2,}\+?)|(ถ{2,}\+?)|(๕{2,}\+?)')
 vowel_error = re.compile(r'เเ')
 repeat_pattern = re.compile(r'([^\d\s]+?)\1+')
@@ -60,7 +60,7 @@ def fixing(line):
 	line = re.sub(duplicate_space, ' ', line)
 	line = re.sub(vowel_error, 'แ', line)
 	line = min_char(line)
-	return line
+	return line.lower()
 
 file = open('./utility/resource/thaiword.txt', 'r', encoding='utf8')
 word_dict = map(lambda line: line[:-1] ,file.readlines())
