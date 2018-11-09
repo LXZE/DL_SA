@@ -18,3 +18,6 @@ txt/
 man/
 __pycache__/
 trash/
+etc/
+share/
+.ipynb_checkpoints/

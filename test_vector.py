@@ -59,16 +59,19 @@ itos = vector_model.index2word
 itos.insert(0, '_lol_')
 stoi = ddict(lambda: 0, {v:k for k,v in enumerate(itos)})
 
-# embedding_dim = 300
-# embedding_matrix = np.zeros((len(itos), embedding_dim))
-# for key, vec in word_dict.items():
-# 	embedding_matrix[stoi[key]] = vec
-# np.save('../model/vec.npy', embedding_matrix)
+embedding_dim = 300
+embedding_matrix = np.zeros((len(itos), embedding_dim))
+for key, vec in word_dict.items():
+    embedding_matrix[stoi[key]] = vec
+np.save('../model/vec.npy', embedding_matrix)
 
-pos_tok = pickle.load(open('../dataset/pos_tok.pkl', 'rb'))
-neg_tok = pickle.load(open('../dataset/neg_tok.pkl', 'rb'))
+pos_name = 'wn_pos'
+neg_name = 'wn_neg'
 
-input_len = 100
+pos_tok = pickle.load(open(f'../dataset/{pos_name}_tok.pkl', 'rb'))
+neg_tok = pickle.load(open(f'../dataset/{neg_name}_tok.pkl', 'rb'))
+
+input_len = 600
 pad_token = '_pad_'
 unk_token = '_unk_'
 
@@ -77,7 +80,10 @@ def sub_space(tok_sentence):
 def sub_lol(tok_sentence):
 	return list(map(lambda token: '_lol_' if token == 'lol' else token, tok_sentence))
 def pad_sentence(tok_sentence):
-	return tok_sentence + [pad_token] * (input_len - len(tok_sentence))
+	if len(tok_sentence) > input_len:
+		return tok_sentence[:input_len]
+	else:
+		return tok_sentence + [pad_token] * (input_len - len(tok_sentence))
 
 unknown_words = {}
 def sen2int(tok_list):
@@ -105,7 +111,7 @@ pos_int = np.array(sen2int(pos_tok))
 neg_int = np.array(sen2int(neg_tok))
 
 # print(pos_int.shape, neg_int.shape)
-np.save('../dataset/pos_int.npy', pos_int)
-np.save('../dataset/neg_int.npy', neg_int)
-print(unknown_words, len(unknown_words))
+np.save(f'../dataset/{pos_name}_int.npy', pos_int)
+np.save(f'../dataset/{neg_name}_int.npy', neg_int)
+# print(unknown_words, len(unknown_words))
 pickle.dump(unknown_words, open('../dataset/unknown.pkl', 'wb'))
