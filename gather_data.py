@@ -1,12 +1,12 @@
-import glob
+import glob, sys
 
 try:
-	entityFile = open('entity.txt','r')
+	entityFile = open(sys.argv[1],'r')
 except IndexError:
-	print('Please give the input file')
+	print('Please give the entity file')
 	exit(0)
 except FileNotFoundError:
-	print('File not found')
+	print('Entity file not found')
 	exit(0)
 
 try:

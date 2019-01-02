@@ -7,12 +7,20 @@ pp = PrettyPrinter(indent=4)
 try:
 	dataset = pd.read_csv(sys.argv[1], escapechar="\\")
 	fileName = sys.argv[1].split('/')[-1].split('.')[0]
-	file = open('entity.txt','r')
 except IndexError:
 	print('Please give the input file')
 	exit(0)
 except FileNotFoundError:
-	print('File not found')
+	print('Input file not found')
+	exit(0)
+
+try:
+	file = open(sys.argv[2],'r')
+except IndexError:
+	print('Please give the entity file')
+	exit(0)
+except FileNotFoundError:
+	print('Entity file not found')
 	exit(0)
 
 entities = {}

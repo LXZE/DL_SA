@@ -15,17 +15,15 @@ for file in rawFileList:
 	print('[{}] Finish cleaning {} with code {}'.format(getTime(), file, code))
 	print('-'*20)
 
-'''
 # filter
 cleanFileList = sorted(glob.glob('data/clean/*'))
 print(cleanFileList)
 pathlib.Path('data/filtered').mkdir(parents=True, exist_ok=True) 
 for file in cleanFileList:
 	print('[{}] Filtering {}'.format(getTime(), file))
-	code = call(['python', 'filter.py', file])
+	code = call(['python', 'filter.py', file, 'sentiment.txt'])
 	print('[{}] Finish filtering {} with code {}'.format(getTime(), file, code))
 	print('-'*20)
 
 # gather
-code = call(['python', 'gather_data.py', file])
-'''
+code = call(['python', 'gather_data.py', file, 'sentiment.txt'])
