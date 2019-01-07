@@ -5,7 +5,7 @@ import pandas as pd
 pp = PrettyPrinter(indent=4)
 
 try:
-	dataset = pd.read_csv(sys.argv[1], escapechar="\\")
+	dataset = pd.read_csv(sys.argv[1], escapechar="\\", encoding='utf8')
 	if os.name == 'nt':
 		fileName = sys.argv[1].split('\\')[-1].split('.')[0]
 	else:
@@ -18,7 +18,7 @@ except FileNotFoundError:
 	exit(0)
 
 try:
-	file = open(sys.argv[2],'r')
+	file = open(sys.argv[2],'r', encoding='utf8')
 except IndexError:
 	print('Please give the entity file')
 	exit(0)
@@ -43,7 +43,7 @@ for idx,row in dataset.iterrows():
 # print(entities)
 # pp.pprint(entities)
 for label, entity in entities.items():
-	file = open('data/filtered/{}-{}.txt'.format(label,fileName),'w')
+	file = open('data/filtered/{}-{}.txt'.format(label,fileName),'w', encoding='utf8')
 	for line in entity['txt']:
 		file.write(line)
 		file.write('\n')

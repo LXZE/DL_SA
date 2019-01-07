@@ -1,7 +1,7 @@
 import glob, sys
 
 try:
-	entityFile = open(sys.argv[1],'r')
+	entityFile = open(sys.argv[1],'r', encoding='utf8')
 except IndexError:
 	print('Please give the entity file')
 	exit(0)
@@ -24,7 +24,7 @@ try:
 		readed[entity] = []
 		fileList = glob.glob('data/filtered/{}*.txt'.format(entity))
 		for filePath in fileList:
-			file = open(filePath, 'r')
+			file = open(filePath, 'r', encoding='utf8')
 			readed[entity] += file.readlines()
 
 except FileNotFoundError:
@@ -34,7 +34,7 @@ except FileNotFoundError:
 # print(readed)
 for key, content in readed.items():
 	print(key)
-	file = open('data/filtered/{}.txt'.format(key),'w')
+	file = open('data/filtered/{}.txt'.format(key),'w', encoding='utf8')
 	for line in content:
 		file.write(line)
 	file.close()
