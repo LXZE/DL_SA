@@ -26,4 +26,4 @@ for file in cleanFileList:
 	print('-'*20)
 
 # gather
-code = call(['python', 'gather_data.py', file, 'sentiment.txt'])
+code = call(['python', 'gather_data.py', 'sentiment.txt'])
