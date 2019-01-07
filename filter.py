@@ -1,12 +1,15 @@
 from pprint import PrettyPrinter
-import sys
+import sys, os
 import pandas as pd
 
 pp = PrettyPrinter(indent=4)
 
 try:
 	dataset = pd.read_csv(sys.argv[1], escapechar="\\")
-	fileName = sys.argv[1].split('/')[-1].split('.')[0]
+	if os.name == 'nt':
+		fileName = sys.argv[1].split('\\')[-1].split('.')[0]
+	else:
+		fileName = sys.argv[1].split('/')[-1].split('.')[0]
 except IndexError:
 	print('Please give the input file')
 	exit(0)
