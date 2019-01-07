@@ -13,14 +13,13 @@ def process(lines, core, acc_result):
 	for line in lines:
 		if bool(time_log_pattern.search(line)):
 			result = clean.stripping(tmp.replace('\ufeff',''))
-			result = clean.filtering(result)
+			result = clean.stripping(clean.fixing(clean.filtering(result)))
 			if len(result) == 0:
 				tmp = ''
 				continue
-
 			tableData = tableData.append({
 				'time': line[1:-3],
-				'text': clean.stripping(clean.fixing(result))
+				'text': result
 			}, ignore_index=True)
 			tmp = ''
 			i+=1
