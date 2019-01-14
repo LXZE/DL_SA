@@ -7,7 +7,8 @@ RUN pip3 --no-cache-dir install \
 	scikit-learn \
 	gensim \
 	keras \
-	matplotlib
+	matplotlib \
+	pythainlp
 
 RUN	pip3 install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.12.0-cp36-cp36m-linux_x86_64.whl
 
