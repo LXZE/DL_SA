@@ -1,0 +1,1 @@
+docker exec -it keras_dlsa /bin/bash

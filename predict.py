@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 import numpy as np
 from collections import defaultdict as ddict
 from keras.models import load_model
@@ -7,7 +10,7 @@ import clean
 from attention import AttentionWithContext as att
 
 vector_model_dir = '../model/thai2vec/word2vec/' 
-vector_model_path_bin = f'{vector_model_dir}thai2vec02.bin'
+vector_model_path_bin = vector_model_dir + 'thai2vec02.bin'
 vector_model = KeyedVectors.load_word2vec_format(vector_model_path_bin, binary=True)
 
 itos = vector_model.index2word
@@ -15,7 +18,7 @@ itos.insert(0, '_lol_')
 stoi = ddict(lambda: 0, {v:k for k,v in enumerate(itos)})
 
 model = load_model('../model/model.hdf5', custom_objects={'AttentionWithContext': att})
-print("Loaded model from disk")
+print('Loaded model from disk')
 
 predict_txt = 'ถ้า dtac ยังแก้ปัญหาให้ดิฉันไม่ได้ ดิฉันก็จะยุให้คนรอบข้างย้ายออกให้หมด ตอนนี้ก็ 3 คนแล้วอ่ะค่ะ ถ้ายังแก้ไม่ได้คนก็จะออกเพิ่มเรื่อย ๆ ไล่ฆ่าแบบแก๊งร่วมอาสา อย่าเพิ่งรีบตาย ชั้นเพิ่งจะเริ่ม'
 
