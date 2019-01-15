@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import glob, re, time, sys
+import glob, re, time, sys, os
 import argparse
 import itertools
 import pandas as pd
@@ -10,10 +10,13 @@ from subprocess import call
 import multiprocessing as mp
 import pythainlp as pyt
 import dill as pickle
+from dotenv import load_dotenv
 from gensim.models import KeyedVectors
 import clean
 sys.path.append('./utility')
 from ThaiTextUtility import ThaiTextUtility as ttext
+
+load_dotenv()
 
 model_path = 'thai-word-segmentation/saved_model'
 
@@ -23,8 +26,8 @@ parser = argparse.ArgumentParser(description='process text to npy')
 parser.add_argument('-n', '--no_tensor', nargs='?', const=True, help='use when no tensorflow installed')
 args, leftovers = parser.parse_known_args()
 
-pos_name = 'wn_pos'
-neg_name = 'wn_neg'
+pos_name = os.getenv('pos_file_name')
+neg_name = os.getenv('neg_file_name')
 
 # import data with label
 # fileList = ['data/test.txt', '../dataset/pos.txt', '../dataset/neg.txt']
@@ -116,25 +119,8 @@ pickle.dump(list_sentence_neg, open(f'../dataset/{neg_name}_tok.pkl', 'wb'))
 # export modified embedding matrix vector instead of make sentence become list vector
 # then convert word to int form instead of vector form
 # counting unknown word for further development
-vector_model_dir = '../model/thai2vec/word2vec/'
-vector_model_path = f'{vector_model_dir}thai2vec02.bin'
-
-vector_model = KeyedVectors.load_word2vec_format(vector_model_path, binary=True)
-
-word_dict = {}
-for word in vector_model.index2word:
-	word_dict[word] = vector_model[word]
-word_vec = pd.DataFrame.from_dict(word_dict, orient='index')
-words = vector_model.index2word
-
-input_len = 100
-pad_token = '_pad_'
-unk_token = '_unk_'
-spc_token = '_space_'
-
 def sub_space(tok_sentence):
 	return list(map(lambda token: '_space_' if token == ' ' else token, tok_sentence))
-
 def pad_sentence(tok_sentence):
 	return tok_sentence + [pad_token] * (input_len - len(tok_sentence))
 

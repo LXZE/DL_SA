@@ -12,12 +12,11 @@ from attention import AttentionWithContext as att
 
 sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8', errors='replace')
 
-vector_model_dir = '../model/thai2vec/word2vec/' 
-vector_model_path_bin = vector_model_dir + 'thai2vec02.bin'
+vector_model_dir = '../model/dl_sa/'
+vector_model_path_bin = f'{vector_model_dir}vec.bin'
 vector_model = KeyedVectors.load_word2vec_format(vector_model_path_bin, binary=True)
 
 itos = vector_model.index2word
-itos.insert(0, '_lol_')
 stoi = ddict(lambda: 0, {v:k for k,v in enumerate(itos)})
 
 print('Loading model from disk...')
