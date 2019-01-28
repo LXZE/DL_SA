@@ -1,11 +1,12 @@
-import multiprocessing as mp
 import sys, csv, re, os
 import pandas as pd
 import numpy as np
+import multiprocessing as mp
+import concurrent.futures as con
 import clean
 
 time_log_pattern = re.compile('\[\d{4}/\d{2}/\d{2}-(?:\d{1,2}:){2}\d{1,2}\],\n')
-def process(lines, core, acc_result):
+def process(lines, core):
 	print('core {} started'.format(core))
 	tableData = pd.DataFrame(columns=['time','text'])
 	tmp = ''
@@ -25,8 +26,8 @@ def process(lines, core, acc_result):
 			i+=1
 		else:
 			tmp += clean.cleanLine(line)
-	acc_result.append((core, tableData))
 	print('core {} finished'.format(core))
+	return (core, tableData)
 
 if __name__ == '__main__':
 	try:
@@ -43,19 +44,22 @@ if __name__ == '__main__':
 		exit(0)
 
 	ncore = mp.cpu_count()
-	output_list = mp.Manager().list()
 
 	all_line = file.readlines()
 	line_chunks = np.array_split(all_line, ncore)
-	processes = [mp.Process(target=process, args=(line_chunks[core], core, output_list)) for core in range(ncore)]
 
-	for p in processes:
-		p.start()
+	output_list = []
+	with con.ProcessPoolExecutor(max_workers=ncore) as executor:
+		workers = {executor.submit(process, line_chunks[core], core): core for core in range(ncore)}
+		for worker in con.as_completed(workers):
+			result_tmp = workers[worker]
+			try:
+				data = worker.result()
+			except Exception as exc:
+				print('Error occurred : {}'.format(exc))
+			else:
+				output_list.append(data)
 
-	for p in processes:
-		p.join()
-
-	print(list(map(lambda x: x[0], output_list)))
 	results_tup = sorted(output_list, key=lambda x: x[0])
 	result_table = pd.concat(list(map(lambda data: data[1], results_tup)))
 
