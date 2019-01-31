@@ -77,7 +77,7 @@ def tokenize(df):
 			inputs = [tlabel.get_input_labels(test_input)]
 			len_input = [len(test_input)]
 
-			# TODO: check performance between newmm, bi-lstm and deepcut and
+			# TODO: check performance between newmm, bi-lstm and deepcut
 			result = sess.run(g_outputs,
 				feed_dict={g_inputs: inputs, g_lengths: len_input, g_training: False})
 			cut_word = split(test_input, nonzero(result))
