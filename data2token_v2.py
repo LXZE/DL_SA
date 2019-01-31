@@ -3,7 +3,6 @@
 
 import glob, re, time, sys, os
 import argparse
-import itertools
 import pandas as pd
 import numpy as np
 from subprocess import call
@@ -12,7 +11,6 @@ import concurrent.futures as conc
 import pythainlp as pyt
 import dill as pickle
 from dotenv import load_dotenv
-from gensim.models import KeyedVectors
 import clean
 sys.path.append('./utility')
 from ThaiTextUtility import ThaiTextUtility as ttext
@@ -34,7 +32,7 @@ neg_name = os.getenv('neg_file_name')
 fileList = [f'../dataset/{pos_name}.txt', f'../dataset/{neg_name}.txt']
 files = []
 for idx, fileName in enumerate(fileList):
-	open_file = open(fileName, 'r')
+	open_file = open(fileName, 'r', encoding='utf-8')
 	tmp = []
 	for line in open_file.readlines():
 		tmp.append([1 if idx == 0 else 0, line[:-1]])
@@ -50,6 +48,7 @@ def split(s, indices):
 	return [s[i:j] for i,j in zip(indices, indices[1:]+[None])]
 
 if args.no_tensor is None:
+	print('loading tensorflow')
 	import tensorflow as tf
 	sys.path.append('./thai-word-segmentation')
 	from thainlplib import ThaiWordSegmentLabeller as tlabel
@@ -110,10 +109,11 @@ def parallel_exec(df):
 				output_list.append(data)
 	return sum(output_list, [])
 
-print('run pos df')
-list_sentence_pos = parallel_exec(pos_df)
-print('run neg df')
-list_sentence_neg = parallel_exec(neg_df)
+if __name__ == '__main__':
+	print('run pos df')
+	list_sentence_pos = parallel_exec(pos_df)
+	print('run neg df')
+	list_sentence_neg = parallel_exec(neg_df)
 
-pickle.dump(list_sentence_pos, open(f'../dataset/{pos_name}_tok.pkl', 'wb'))
-pickle.dump(list_sentence_neg, open(f'../dataset/{neg_name}_tok.pkl', 'wb'))
+	pickle.dump(list_sentence_pos, open(f'../dataset/{pos_name}_tok.pkl', 'wb'))
+	pickle.dump(list_sentence_neg, open(f'../dataset/{neg_name}_tok.pkl', 'wb'))
