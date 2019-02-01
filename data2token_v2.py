@@ -47,13 +47,17 @@ def nonzero(a):
 def split(s, indices):
 	return [s[i:j] for i,j in zip(indices, indices[1:]+[None])]
 
-if args.no_tensor is None:
-	print('loading tensorflow')
+
+
+# if args.no_tensor is None:
+def predict(df, core):
+	print(f'loading tensorflow to core {core}')
 	import tensorflow as tf
 	sys.path.append('./thai-word-segmentation')
 	from thainlplib import ThaiWordSegmentLabeller as tlabel
 
-	sess = tf.Session()
+	config = tf.ConfigProto(device_count = {'GPU': 0})
+	sess = tf.Session(config=config)
 	model = tf.saved_model.loader.load(sess, [tf.saved_model.tag_constants.SERVING], model_path)
 
 	graph = tf.get_default_graph()
@@ -62,38 +66,47 @@ if args.no_tensor is None:
 	g_training = graph.get_tensor_by_name('Placeholder_1:0')
 	g_outputs = graph.get_tensor_by_name('boolean_mask_1/Gather:0')
 
+	results = []
+	for idx, row in df.iterrows():
+		test_input = clean.fixing(row['text'])
+		inputs = [tlabel.get_input_labels(test_input)]
+		len_input = [len(test_input)]
+		result = sess.run(g_outputs,
+			feed_dict={g_inputs: inputs, g_lengths: len_input, g_training: False})
+		cut_word = split(test_input, nonzero(result))
+		cut_word = clean_n_sub(cut_word)
+		results.append(cut_word)
+	return results
+
 util = ttext()
+
+def clean_n_sub(word):
+	cut_word = list(map(lambda x: clean.clean_word(x), word))
+	suggest_word = list(map(lambda x: util.lemmatize(x), cut_word))
+	for idx, (word, alt) in enumerate(zip(cut_word, suggest_word)):
+		if(len(alt) == 1):
+			cut_word[idx] = alt[0][0]
+	return cut_word
 
 def tokenize(df, core):
 	tokenized_sentence = []
 	print('core {} started'.format(core))
-	for idx, row in df.iterrows():
-		test_input = clean.fixing(row['text'])
 
-		if args.no_tensor is None:
-			inputs = [tlabel.get_input_labels(test_input)]
-			len_input = [len(test_input)]
-
-			# TODO: check performance between newmm, bi-lstm and deepcut
-			result = sess.run(g_outputs,
-				feed_dict={g_inputs: inputs, g_lengths: len_input, g_training: False})
-			cut_word = split(test_input, nonzero(result))
-
-		else:
+	if args.no_tensor is None:
+		tokenized_sentence = predict(df, core)
+	else:
+		for idx, row in df.iterrows():
+			test_input = clean.fixing(row['text'])
 			cut_word = pyt.word_tokenize(test_input, engine='newmm')
-
-		cut_word = list(map(lambda x: clean.clean_word(x), cut_word))
-		# TODO: make suggestion word substitution depends on variable
-		suggest_word = list(map(lambda x: util.lemmatize(x), cut_word))
-		for idx, (word, alt) in enumerate(zip(cut_word, suggest_word)):
-			if(len(alt) == 1):
-				cut_word[idx] = alt[0][0]
-		tokenized_sentence.append(cut_word)
+			cut_word = clean_n_sub(cut_word)
+			tokenized_sentence.append(cut_word)
+	
 	print('core {} finished'.format(core))
 	return tokenized_sentence
 
 def parallel_exec(df):
 	ncore = mp.cpu_count()
+	# ncore = 2
 	output_list = []
 	with conc.ProcessPoolExecutor(max_workers=ncore) as executor:
 		workers = {
