@@ -17,12 +17,6 @@ vector_model = KeyedVectors.load_word2vec_format(vector_model_path_bin, binary=T
 itos = vector_model.index2word
 stoi = ddict(lambda: 0, {v:k for k,v in enumerate(itos)})
 
-# embedding_dim = 300
-# embedding_matrix = np.zeros((len(itos), embedding_dim))
-# for key, vec in word_dict.items():
-# 	embedding_matrix[stoi[key]] = vec
-# np.save('../model/vec.npy', embedding_matrix)
-
 pos_name = os.getenv('pos_file_name')
 neg_name = os.getenv('neg_file_name')
 

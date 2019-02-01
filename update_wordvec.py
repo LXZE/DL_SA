@@ -69,3 +69,9 @@ model.save_word2vec_format(f'{new_dir}{file_name}.bin', None, True)
 itos = model.index2word
 stoi = ddict(lambda: 0, {v:k for k,v in enumerate(itos)})
 print(len(itos))
+
+embedding_dim = 300
+embedding_matrix = np.zeros((len(itos), embedding_dim))
+for key, vec in word_dict.items():
+	embedding_matrix[stoi[key]] = vec
+np.save('../model/vec.npy', embedding_matrix)
