@@ -47,8 +47,6 @@ def nonzero(a):
 def split(s, indices):
 	return [s[i:j] for i,j in zip(indices, indices[1:]+[None])]
 
-
-
 # if args.no_tensor is None:
 def predict(df, core):
 	print(f'loading tensorflow to core {core}')
@@ -86,6 +84,7 @@ def clean_n_sub(word):
 	for idx, (word, alt) in enumerate(zip(cut_word, suggest_word)):
 		if(len(alt) == 1):
 			cut_word[idx] = alt[0][0]
+	cut_word = list(map(lambda word: clean.stripping(word), cut_word))
 	return cut_word
 
 def tokenize(df, core):
@@ -100,7 +99,7 @@ def tokenize(df, core):
 			cut_word = pyt.word_tokenize(test_input, engine='newmm')
 			cut_word = clean_n_sub(cut_word)
 			tokenized_sentence.append(cut_word)
-	
+
 	print('core {} finished'.format(core))
 	return tokenized_sentence
 

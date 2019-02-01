@@ -47,7 +47,8 @@ def filtering(line):
 
 # removing whitespace
 def stripping(line):
-	tmp = line.lstrip(' ')
+	tmp = re.sub('\s+',' ',line)
+	tmp = tmp.lstrip(' ')
 	return tmp.rstrip(' ')
 
 # fixing, lower, replacing any kind of pattern and error in Thai
