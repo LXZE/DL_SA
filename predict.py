@@ -12,7 +12,7 @@ from attention import AttentionWithContext as att
 
 sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8', errors='replace')
 
-vector_model_dir = '../model/dl_sa/'
+vector_model_dir = '../model/'
 vector_model_path_bin = f'{vector_model_dir}vec.bin'
 vector_model = KeyedVectors.load_word2vec_format(vector_model_path_bin, binary=True)
 
