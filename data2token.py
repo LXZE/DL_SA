@@ -3,15 +3,14 @@
 
 import glob, re, time, sys, os
 import argparse
-import itertools
 import pandas as pd
 import numpy as np
 from subprocess import call
 import multiprocessing as mp
+import concurrent.futures as conc
 import pythainlp as pyt
 import dill as pickle
 from dotenv import load_dotenv
-from gensim.models import KeyedVectors
 import clean
 sys.path.append('./utility')
 from ThaiTextUtility import ThaiTextUtility as ttext
@@ -22,7 +21,7 @@ model_path = 'thai-word-segmentation/saved_model'
 
 getTime = lambda : time.strftime("%Y-%m-%d %H:%M:%S")
 
-parser = argparse.ArgumentParser(description='process text to npy')
+parser = argparse.ArgumentParser(description='process text to token and save in pkl')
 parser.add_argument('-n', '--no_tensor', nargs='?', const=True, help='use when no tensorflow installed')
 args, leftovers = parser.parse_known_args()
 
@@ -30,11 +29,10 @@ pos_name = os.getenv('pos_file_name')
 neg_name = os.getenv('neg_file_name')
 
 # import data with label
-# fileList = ['data/test.txt', '../dataset/pos.txt', '../dataset/neg.txt']
 fileList = [f'../dataset/{pos_name}.txt', f'../dataset/{neg_name}.txt']
 files = []
 for idx, fileName in enumerate(fileList):
-	open_file = open(fileName, 'r')
+	open_file = open(fileName, 'r', encoding='utf-8')
 	tmp = []
 	for line in open_file.readlines():
 		tmp.append([1 if idx == 0 else 0, line[:-1]])
@@ -49,12 +47,15 @@ def nonzero(a):
 def split(s, indices):
 	return [s[i:j] for i,j in zip(indices, indices[1:]+[None])]
 
-if args.no_tensor is None:
+# if args.no_tensor is None:
+def predict(df, core):
+	print(f'loading tensorflow to core {core}')
 	import tensorflow as tf
 	sys.path.append('./thai-word-segmentation')
 	from thainlplib import ThaiWordSegmentLabeller as tlabel
 
-	sess = tf.Session()
+	config = tf.ConfigProto(device_count = {'GPU': 0})
+	sess = tf.Session(config=config)
 	model = tf.saved_model.loader.load(sess, [tf.saved_model.tag_constants.SERVING], model_path)
 
 	graph = tf.get_default_graph()
@@ -63,110 +64,69 @@ if args.no_tensor is None:
 	g_training = graph.get_tensor_by_name('Placeholder_1:0')
 	g_outputs = graph.get_tensor_by_name('boolean_mask_1/Gather:0')
 
+	results = []
+	for idx, row in df.iterrows():
+		test_input = clean.fixing(row['text'])
+		inputs = [tlabel.get_input_labels(test_input)]
+		len_input = [len(test_input)]
+		result = sess.run(g_outputs,
+			feed_dict={g_inputs: inputs, g_lengths: len_input, g_training: False})
+		cut_word = split(test_input, nonzero(result))
+		cut_word = clean_n_sub(cut_word)
+		results.append(cut_word)
+	return results
+
 util = ttext()
 
-def tokenize(df):
+def clean_n_sub(word):
+	cut_word = list(map(lambda x: clean.clean_word(x), word))
+	suggest_word = list(map(lambda x: util.lemmatize(x), cut_word))
+	for idx, (word, alt) in enumerate(zip(cut_word, suggest_word)):
+		if(len(alt) == 1):
+			cut_word[idx] = alt[0][0]
+	cut_word = list(map(lambda word:
+		clean.stripping(word) if len(word) > 1 
+		else word, cut_word))
+	return cut_word
+
+def tokenize(df, core):
 	tokenized_sentence = []
+	print('core {} started'.format(core))
 
-	# for idx, row in itertools.islice(df.iterrows(), 2):
-	for idx, row in df.iterrows():
-		test_input = row['text']
-		test_input = clean.fixing(test_input)
-
-		if args.no_tensor is None:
-			inputs = [tlabel.get_input_labels(test_input)]
-			len_input = [len(test_input)]
-
-			# TODO: check performance between newmm, bi-lstm and deepcut
-			result = sess.run(g_outputs,
-				feed_dict={g_inputs: inputs, g_lengths: len_input, g_training: False})
-			cut_word = split(test_input, nonzero(result))
-
-		else:
+	if args.no_tensor is None:
+		tokenized_sentence = predict(df, core)
+	else:
+		for idx, row in df.iterrows():
+			test_input = clean.fixing(row['text'])
 			cut_word = pyt.word_tokenize(test_input, engine='newmm')
+			cut_word = clean_n_sub(cut_word)
+			tokenized_sentence.append(cut_word)
 
-		cut_word = list(map(lambda x: clean.clean_word(x), cut_word))
-		# TODO: make suggestion word substitution depends on variable
-		suggest_word = list(map(lambda x: util.lemmatize(x), cut_word))
-		for idx, (word, alt) in enumerate(zip(cut_word, suggest_word)):
-			if(len(alt) == 1):
-				cut_word[idx] = alt[0][0]
-		tokenized_sentence.append(cut_word)
-
+	print('core {} finished'.format(core))
 	return tokenized_sentence
 
-ncore = mp.cpu_count()
-pool = mp.Pool(ncore)
-# df_split = np.array_split(pos_df, ncore, axis=1)
-# NOTE: senquence in list of sentence is not in order after distributed through pool
-dfs = [pos_df[i::ncore] for i in range(ncore)]
-list_sentence_pos = sum(pool.map(tokenize, dfs), [])
-dfs = [neg_df[i::ncore] for i in range(ncore)]
-list_sentence_neg = sum(pool.map(tokenize, dfs), [])
-pool.close()
-pool.join()
+def parallel_exec(df):
+	ncore = mp.cpu_count()
+	output_list = []
+	with conc.ProcessPoolExecutor(max_workers=ncore) as executor:
+		workers = {
+			executor.submit(tokenize, df[core_idx::ncore], core_idx):
+				core_idx for core_idx in range(ncore)
+		}
+		for worker in conc.as_completed(workers):
+			try:
+				data = worker.result()
+			except Exception as exc:
+				print('Error occurred : {}'.format(exc))
+			else:
+				output_list.append(data)
+	return sum(output_list, [])
 
-pickle.dump(list_sentence_pos, open(f'../dataset/{pos_name}_tok.pkl', 'wb'))
-pickle.dump(list_sentence_neg, open(f'../dataset/{neg_name}_tok.pkl', 'wb'))
+if __name__ == '__main__':
+	print('run pos df')
+	list_sentence_pos = parallel_exec(pos_df)
+	print('run neg df')
+	list_sentence_neg = parallel_exec(neg_df)
 
-# then let input length = 100
-# vocab size maybe 60000+2+n (n can be found from traverse through our data set)
-# weight of pre-trained database will be imported and added with new vocab
-# new vocab's vector can generate with all zeros, all random, average from top nearest k words
-# if use keras then make it trainable
-'''
-# word vectorize
-# export modified embedding matrix vector instead of make sentence become list vector
-# then convert word to int form instead of vector form
-# counting unknown word for further development
-def sub_space(tok_sentence):
-	return list(map(lambda token: '_space_' if token == ' ' else token, tok_sentence))
-def pad_sentence(tok_sentence):
-	return tok_sentence + [pad_token] * (input_len - len(tok_sentence))
-
-# TODO: save unknown for adding as a new word in dictionary
-def sub_unk(tok_sentence):
-	return list(map(lambda token: unk_token if token not in words else token, tok_sentence))
-
-def rm_unk(tok_sentence):
-	return list(filter(lambda token: token in words, tok_sentence))
-
-def rm_dup_spc(tok_sentence):
-	res = []
-	for token in tok_sentence:
-		if token == spc_token and res[-1] == token:
-			print(res)
-			pass
-		else:
-			res.append(token)
-	return res
-
-# 2 approaches
-# 1: sub all unknown word with token _unk_ before pad
-# 2: ignore all unknown word then padding to input len
-approach = 1
-def token_prepare(tok_sentence):
-	tmp = tok_sentence
-	if approach == 1:
-		tmp = sub_space(tmp)
-		tmp = pad_sentence(tmp)
-		tmp = sub_unk(tmp)
-	else:
-		tmp = rm_unk(tmp)
-		tmp = rm_dup_spc(tmp)
-		tmp = pad_sentence(tmp)
-	return tmp
-list_sentence_pos = list(map(lambda sen: token_prepare(sen), list_sentence_pos))
-list_sentence_neg = list(map(lambda sen: token_prepare(sen), list_sentence_neg))
-
-def sen2vec(tok_sentence):
-	tmp = []
-	for token in tok_sentence:
-		tmp.append(word_dict[token])
-	return tmp
-
-list_vector_pos = np.array(list(map(lambda sen: sen2vec(sen), list_sentence_pos)))
-list_vector_neg = np.array(list(map(lambda sen: sen2vec(sen), list_sentence_neg)))
-
-np.save(f'{pos_name}.npy', list_vector_pos)
-np.save(f'{neg_name}.npy', list_vector_neg)'''
+	pickle.dump(list_sentence_pos, open(f'../dataset/{pos_name}_tok.pkl', 'wb'))
+	pickle.dump(list_sentence_neg, open(f'../dataset/{neg_name}_tok.pkl', 'wb'))

@@ -11,6 +11,9 @@ prefix = 'newmm'
 pos = np.load(f'../dataset/{prefix}_{pos_name}_int.npy')
 neg = np.load(f'../dataset/{prefix}_{neg_name}_int.npy')
 
+print(f'pos size = {len(pos)}')
+print(f'neg size = {len(neg)}')
+
 x = np.concatenate((pos,neg), axis = 0)
 y = np.concatenate(
 	(
@@ -18,11 +21,10 @@ y = np.concatenate(
 		np.full((neg.shape[0], 2), [1, 0])
 	), axis = 0
 )
-x = x.astype('float32')
+x = x.astype('int32')
 y = y.astype('int32')
 
-x_train, x_test, y_train, y_test =  train_test_split(x,y, test_size=0.15, stratify=y)
-
+x_train, x_test, y_train, y_test =  train_test_split(x,y, test_size=0.15, stratify=y, random_state=420)
 
 print(x_train, y_train)
 print(x_train.shape, y_train.shape)

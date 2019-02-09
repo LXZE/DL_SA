@@ -12,7 +12,9 @@ emoji_pattern = re.compile("["
 	u"\U0001F300-\U0001F5FF"  # symbols & pictographs
 	u"\U0001F680-\U0001F6FF"  # transport & map symbols
 	u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-						"]+", flags=re.UNICODE)
+	u"\U00002702-\U000027B0"
+	u"\U000024C2-\U0001F251"
+	"]+", flags=re.UNICODE)
 multichar_emoji_pattern = re.compile(r'(<3)')
 url_pattern = re.compile(r'(https:\S+)')
 hashtag_pattern = re.compile(r'(\#\S+)')
@@ -42,7 +44,6 @@ def cleanLine(line):
 # filtering only thai, numerical and latin character
 non_thai_eng_pattern = re.compile(r'([^\u0E00-\u0E7Fa-zA-Z0-9฿%\s]+)')
 def filtering(line):
-	non_thai_eng_pattern = re.compile(r'([^\u0E00-\u0E7Fa-zA-Z0-9#฿%\s]+)')
 	return re.sub(non_thai_eng_pattern, '', line)
 
 # removing whitespace
