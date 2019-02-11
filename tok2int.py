@@ -6,6 +6,7 @@ from subprocess import call
 from gensim.models import KeyedVectors
 from collections import defaultdict as ddict
 from itertools import islice
+from tqdm import tqdm
 from dotenv import load_dotenv
 import clean
 
@@ -42,6 +43,7 @@ def sen2int(tok_list):
 	global unknown_words
 	tok_sentence = np.array(tok_list)
 	new_int_sentence = []
+	pbar = tqdm(total=len(tok_sentence))
 	for list_tok in tok_sentence:
 		tmp = []
 		list_tok = sub_space(list_tok)
@@ -58,6 +60,8 @@ def sen2int(tok_list):
 					unknown_words[tok] += 1
 				tmp.append(stoi[unk_token])
 		new_int_sentence.append(tmp)
+		pbar.update(1)
+	pbar.close()
 	return new_int_sentence
 
 pos_int = np.array(sen2int(pos_tok))
@@ -67,4 +71,4 @@ neg_int = np.array(sen2int(neg_tok))
 np.save(f'../dataset/{pos_name}_int.npy', pos_int)
 np.save(f'../dataset/{neg_name}_int.npy', neg_int)
 # print(unknown_words, len(unknown_words))
-pickle.dump(unknown_words, open('../dataset/unknown.pkl', 'wb'))
+pickle.dump(unknown_words, open(f'../dataset/unknown_{pos_name}.pkl', 'wb'))

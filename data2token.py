@@ -93,10 +93,8 @@ def clean_n_sub(word):
 def tokenize(df, core):
 	tokenized_sentence = []
 	print('core {} started'.format(core))
-
 	if core == 0:
 		pbar = tqdm(total=len(list(df.iterrows())), desc="Core 0 -> ")
-
 	if args.no_tensor is None:
 		tokenized_sentence = predict(df, core)
 	else:
@@ -106,7 +104,7 @@ def tokenize(df, core):
 			cut_word = clean_n_sub(cut_word)
 			tokenized_sentence.append(cut_word)
 			if core == 0: pbar.update(1)
-
+	pbar.close()
 	print('core {} finished'.format(core))
 	return tokenized_sentence
 
