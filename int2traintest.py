@@ -6,10 +6,10 @@ load_dotenv()
 
 pos_name = os.getenv('pos_file_name')
 neg_name = os.getenv('neg_file_name')
-prefix = 'newmm'
+prefix = ''
 
-pos = np.load(f'../dataset/{prefix}_{pos_name}_int.npy')
-neg = np.load(f'../dataset/{prefix}_{neg_name}_int.npy')
+pos = np.load(f'../dataset/{prefix}{pos_name}_int.npy')
+neg = np.load(f'../dataset/{prefix}{neg_name}_int.npy')
 
 print(f'pos size = {len(pos)}')
 print(f'neg size = {len(neg)}')

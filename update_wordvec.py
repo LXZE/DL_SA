@@ -6,19 +6,13 @@ import dill as pickle
 import re
 import clean
 
-unknown_words = pickle.load(open('../dataset/unknown_bilstm.pkl', 'rb'))
-bilstm_unk_counter = Counter(unknown_words)
+unknown_words = pickle.load(open('../dataset/unknown_sent.pkl', 'rb'))
+counter = Counter(unknown_words)
 min_threshold = 2
-for key, count in list(bilstm_unk_counter.items()):
-	if count < min_threshold: del bilstm_unk_counter[key]
+for key, count in list(counter.items()):
+	if count < min_threshold: del counter[key]
 
-unknown_words = pickle.load(open('../dataset/unknown_newmm.pkl', 'rb'))
-newmm_unk_counter = Counter(unknown_words)
-min_threshold = 2
-for key, count in list(newmm_unk_counter.items()):
-	if count < min_threshold: del newmm_unk_counter[key]
-
-all_counter = bilstm_unk_counter + newmm_unk_counter
+all_counter = counter
 del all_counter['	']
 del all_counter[' ']
 min_threshold = 2
@@ -34,9 +28,12 @@ for key, count in list(all_counter.items()):
 		if len(key) > long_word_threshold: del all_counter[key]
 	except ValueError as e:
 		print(e, key)
+
+print(f'# Word that occur more than 2 = {len(all_counter)}')
+print(all_counter.most_common(10))
 accept_key = []
-# for key, val in all_counter.most_common(5000):
-for key, val in all_counter.most_common(4997): # -3 which are special token
+accept_amount = 1000
+for key, val in all_counter.most_common(accept_amount):
 	accept_key.append(key)
 
 # create new vec.bin
@@ -52,7 +49,7 @@ for word in vector_model.index2word:
 word_vec = pd.DataFrame.from_dict(word_dict, orient='index')
 
 new_dir = '../model/dl_sa/'
-file_name = 'vec_v2'
+file_name = 'vec_v3'
 word_vec.to_csv(f'{new_dir}{file_name}.vec', sep=' ', header=False, line_terminator='\n', encoding='utf-8')
 print('saved')
 shape_val = re.search('(\d+)\,\s(\d+)', str(word_vec.shape)).groups()
@@ -74,4 +71,4 @@ embedding_dim = 300
 embedding_matrix = np.zeros((len(itos), embedding_dim))
 for key, vec in word_dict.items():
 	embedding_matrix[stoi[key]] = vec
-np.save('../model/vec.npy', embedding_matrix)
+np.save('{new_dir}{file_name}.npy', embedding_matrix)
