@@ -23,3 +23,7 @@ share/
 .ipynb_checkpoints/
 *.json
 *.pyc
+
+# custom
+result*
+result/
